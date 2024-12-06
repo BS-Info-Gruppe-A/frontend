@@ -1,13 +1,31 @@
 package eu.bsinfo.rest
 
 import eu.bsinfo.data.Customers
+import eu.bsinfo.data.Readings
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
+import io.ktor.client.plugins.resources.*
+import io.ktor.client.plugins.resources.Resources
 import io.ktor.http.*
+import io.ktor.resources.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlin.uuid.Uuid
+
+class Route {
+    @Resource("/customers")
+    class Customers {
+        @Resource("{id}")
+        data class Specific(val id: Uuid, val parent: Customers = Customers())
+    }
+
+    @Resource("/readings")
+    class Readings {
+        @Resource("{id}")
+        data class Specific(val id: Uuid, val parent: Readings = Readings())
+    }
+}
 
 class Client {
     private val client = HttpClient {
@@ -15,11 +33,15 @@ class Client {
             json()
         }
 
+        install(Resources)
+
         defaultRequest {
             url.takeFrom("http://localhost:8080")
         }
     }
 
-    suspend fun getCustomers() = client.get("/customers")
-        .body<Customers>()
+    suspend fun getCustomers() = client.get(Route.Customers()).body<Customers>()
+    suspend fun deleteCustomer(id: Uuid) = client.delete(Route.Customers.Specific(id)).body<Unit>()
+    suspend fun getReadings() = client.get(Route.Readings()).body<Readings>()
+    suspend fun deleteReading(id: Uuid) = client.delete(Route.Readings.Specific(id)).body<Unit>()
 }

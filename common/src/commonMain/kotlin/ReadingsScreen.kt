@@ -5,19 +5,19 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cake
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.DeleteDialog
-import eu.bsinfo.data.Customer
+import eu.bsinfo.data.Reading
 import eu.bsinfo.data.readableFormat
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
@@ -28,41 +28,41 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
-data class CustomersScreenState(
+data class ReadingsScreenState(
     val isLoading: Boolean = true,
-    val customers: List<Customer> = emptyList(),
+    val readings: List<Reading> = emptyList(),
 )
 
-class CustomersScreenModel(private val client: Client) : ViewModel() {
-    private val _uiState = MutableStateFlow(CustomersScreenState())
+class ReadingsScreenModel(private val client: Client) : ViewModel() {
+    private val _uiState = MutableStateFlow(ReadingsScreenState())
     val uiState = _uiState.asStateFlow()
 
-    suspend fun refreshCustomers() = withContext(Dispatchers.IO) {
-        _uiState.emit(uiState.value.copy(customers = client.getCustomers().customers, isLoading = false))
+    suspend fun refreshReadings() = withContext(Dispatchers.IO) {
+        _uiState.emit(uiState.value.copy(readings = client.getReadings().readings, isLoading = false))
     }
 
-    suspend fun deleteCustomer(customerId: Uuid) = withContext(Dispatchers.IO) {
-        client.deleteCustomer(customerId)
-        _uiState.emit(uiState.value.copy(customers = uiState.value.customers.filter { it.id != customerId }))
+    suspend fun deleteReading(readingId: Uuid) = withContext(Dispatchers.IO) {
+        client.deleteReading(readingId)
+        _uiState.emit(uiState.value.copy(readings = uiState.value.readings.filter { it.id != readingId }))
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomersScreen(
+fun ReadingsScreen(
     client: Client = LocalClient.current,
-    model: CustomersScreenModel = viewModel { CustomersScreenModel(client) }
+    model: ReadingsScreenModel = viewModel { ReadingsScreenModel(client) }
 ) {
     val state by model.uiState.collectAsState()
     val scope = rememberCoroutineScope()
 
     if (state.isLoading) {
-        LaunchedEffect(state) { model.refreshCustomers() }
+        LaunchedEffect(state) { model.refreshReadings() }
     }
 
     PullToRefreshBox(
         state.isLoading,
-        { scope.launch { model.refreshCustomers() } },
+        { scope.launch { model.refreshReadings() } },
         modifier = Modifier.fillMaxSize()
     ) {
         LazyVerticalGrid(
@@ -71,19 +71,19 @@ fun CustomersScreen(
             horizontalArrangement = Arrangement.spacedBy(7.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(state.customers) { customer ->
-                CustomerCard(customer, model)
+            items(state.readings) { reading ->
+                ReadingCard(reading, model)
             }
         }
     }
 }
 
 @Composable
-private fun CustomerCard(customer: Customer, model: CustomersScreenModel) {
+private fun ReadingCard(reading: Reading, model: ReadingsScreenModel) {
     ElevatedCard(
         modifier = Modifier
             .width(260.dp)
-            .height(100.dp)
+            .height(150.dp)
             .padding(vertical = 7.dp)
     ) {
         Box(
@@ -97,26 +97,45 @@ private fun CustomerCard(customer: Customer, model: CustomersScreenModel) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        customer.fullName,
+                        "Ablesung von ${reading.meterId}",
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier
                             .padding(horizontal = 10.dp, vertical = 7.dp)
                             .fillMaxWidth(fraction = .9f)
                     )
                     Spacer(Modifier.weight(1f))
-                    CustomerDropDown(customer, model)
+                    ReadingDropDown(reading, model)
                 }
-                Row(
-                    horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                    horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()
                 ) {
-                    CustomerDetail(
-                        Icons.Filled.Person,
-                        customer.gender.humanName
-                    )
-                    CustomerDetail(
-                        icon = Icons.Filled.Cake,
-                        text = readableFormat.format(customer.birthDate)
-                    )
+                    Row {
+                        ReadingDetail(
+                            Icons.Filled.Person,
+                            reading.customer?.fullName ?: "Unbekannt"
+                        )
+                        ReadingDetail(
+                            icon = Icons.Filled.GasMeter,
+                            text = reading.meterCount.toString()
+                        )
+                    }
+                    Row {
+                        ReadingDetail(
+                            icon = Icons.Filled.CalendarToday,
+                            text = readableFormat.format(reading.dateOfReading)
+                        )
+                        ReadingDetail(
+                            icon = Icons.Filled.ElectricMeter,
+                            text = reading.kindOfMeter.readableName
+                        )
+                    }
+                    Row {
+                        ReadingDetail(
+                            icon = Icons.AutoMirrored.Filled.Comment,
+                            text = reading.comment
+                        )
+                    }
                 }
             }
         }
@@ -124,7 +143,7 @@ private fun CustomerCard(customer: Customer, model: CustomersScreenModel) {
 }
 
 @Composable
-private fun CustomerDetail(icon: ImageVector, text: String) {
+private fun ReadingDetail(icon: ImageVector, text: String) {
     Row(Modifier.padding(horizontal = 3.dp)) {
         Icon(
             imageVector = icon, contentDescription = null
@@ -135,7 +154,7 @@ private fun CustomerDetail(icon: ImageVector, text: String) {
 }
 
 @Composable
-private fun CustomerDropDown(customer: Customer, model: CustomersScreenModel) {
+private fun ReadingDropDown(customer: Reading, model: ReadingsScreenModel) {
     var expanded by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
 
@@ -143,9 +162,9 @@ private fun CustomerDropDown(customer: Customer, model: CustomersScreenModel) {
         DeleteDialog(
             isDeleting,
             { isDeleting = false },
-            { model.deleteCustomer(customer.id) },
-            title = { Text("Kunden löschen?", color = MaterialTheme.colorScheme.onError) },
-            text = { Text("Möchten Sie den Kunden wirklich löschen?", color = MaterialTheme.colorScheme.onError) },
+            { model.deleteReading(customer.id) },
+            title = { Text("Ablesung löschen?", color = MaterialTheme.colorScheme.onError) },
+            text = { Text("Möchten Sie die Ablesung wirklich löschen?", color = MaterialTheme.colorScheme.onError) },
         )
     }
 

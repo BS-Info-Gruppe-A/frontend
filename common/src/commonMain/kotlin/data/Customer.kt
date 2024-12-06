@@ -11,8 +11,10 @@ data class Customer(
     val birthDate: SerializableDate,
     val gender: Gender
 ) {
-    enum class Gender {
-        M, D, F
+    val fullName get() = "$firstName $lastName"
+
+    enum class Gender(val humanName: String) {
+        M("Männlich"), D("Divers"), F("Weiblich"), U("Unbekannt")
     }
 }
 

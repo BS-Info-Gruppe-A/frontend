@@ -8,3 +8,9 @@ dependencies {
     implementation(projects.common)
     implementation(compose.desktop.currentOs)
 }
+
+compose.desktop {
+    application {
+        mainClass = "eu.bsinfo.desktop.MainKt"
+    }
+}

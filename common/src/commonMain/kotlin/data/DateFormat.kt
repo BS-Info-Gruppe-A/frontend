@@ -1,6 +1,7 @@
 package eu.bsinfo.data
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.serialization.KSerializer
@@ -29,4 +30,17 @@ object DateSerializer : KSerializer<LocalDate> {
 
     override fun deserialize(decoder: Decoder): LocalDate =
         format.parse(decoder.decodeString())
+}
+
+private val germanMonths = MonthNames(
+    "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"
+)
+
+val readableFormat = LocalDate.Format {
+    dayOfMonth()
+    char('.')
+    char(' ')
+    monthName(germanMonths)
+    char(' ')
+    year()
 }

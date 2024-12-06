@@ -1,35 +1,54 @@
 package eu.bsinfo
 
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GasMeter
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+
+enum class MainScreen {
+    Customers, Readings
+}
 
 @Composable
 fun BSInfoApp() {
-    var showCustomers by remember { mutableStateOf(true) }
-    var showReadings by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentScreen = MainScreen.valueOf(backStackEntry?.destination?.route ?: MainScreen.Customers.name)
 
     Scaffold(bottomBar = {
         BottomAppBar {
             NavigationBar {
-                NavigationBarItem(showCustomers, {showCustomers = true; showReadings = false}, {
-                    Icon(Icons.Default.Person, contentDescription = null)
-                }, label = { Text("Customers") })
-                NavigationBarItem(showReadings, {showReadings = true; showCustomers = false}, {
-                    Icon(Icons.Default.GasMeter, contentDescription = null)
-                }, label = { Text("Readings") })
+                NavigationBarItem(
+                    currentScreen == MainScreen.Customers,
+                    { navController.navigate(MainScreen.Customers.name) },
+                    {
+                        Icon(Icons.Default.Person, contentDescription = null)
+                    },
+                    label = { Text("Customers") })
+                NavigationBarItem(
+                    currentScreen == MainScreen.Readings,
+                    { navController.navigate(MainScreen.Readings.name) },
+                    {
+                        Icon(Icons.Default.GasMeter, contentDescription = null)
+                    },
+                    label = { Text("Readings") })
             }
         }
     }) {
-        if (showCustomers) {
-            CustomersScreen()
+        NavHost(navController, startDestination = MainScreen.Customers.name) {
+            composable(route = MainScreen.Customers.name) {
+                CustomersScreen()
+            }
+
+            composable(route = MainScreen.Readings.name) {
+                ReadingsScreen()
+            }
         }
     }
 }
