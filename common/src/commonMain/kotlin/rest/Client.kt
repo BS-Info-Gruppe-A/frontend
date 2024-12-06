@@ -36,7 +36,7 @@ class Client {
         install(Resources)
 
         defaultRequest {
-            url.takeFrom("http://localhost:8080")
+            url.takeFrom("https://api.hausfix.devs-from.asia")
         }
     }
 

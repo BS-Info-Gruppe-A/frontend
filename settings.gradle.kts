@@ -11,4 +11,4 @@ pluginManagement {
 
 rootProject.name = "bsinfo-app"
 
-include("common", "desktop")
+include("common", "desktop", "web")

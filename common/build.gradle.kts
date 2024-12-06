@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
@@ -5,8 +7,12 @@ plugins {
     alias(libs.plugins.compose)
 }
 
+@OptIn(ExperimentalWasmDsl::class)
 kotlin {
     jvm()
+    wasmJs {
+        browser()
+    }
 
     compilerOptions {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
