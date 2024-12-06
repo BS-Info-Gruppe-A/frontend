@@ -1,11 +1,14 @@
 package eu.bsinfo.components
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import eu.bsinfo.IO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,13 +36,8 @@ fun DeleteDialog(
                     tint = MaterialTheme.colorScheme.onError,
                 )
             },
-            confirmButtonContent = {
-                Icon(
-                    imageVector = Icons.Filled.DeleteForever,
-                    contentDescription = "Eintrag löschen",
-                )
-                Text("Eintrag löschen")
-            },
+            confirmButtonIcon = { Icon(Icons.Filled.DeleteForever, null) },
+            confirmButtonText = { Text("Eintrag löschen") },
             enabled = enabled,
         )
     }
@@ -54,7 +52,8 @@ private fun Dialog(
     title: @Composable (() -> Unit)? = null,
     text: @Composable (() -> Unit)? = null,
     icon: @Composable (() -> Unit)? = null,
-    confirmButtonContent: @Composable RowScope.() -> Unit,
+    confirmButtonIcon: @Composable RowScope.() -> Unit,
+    confirmButtonText: @Composable RowScope.() -> Unit,
     confirmButtonColors: ButtonColors = ButtonDefaults.buttonColors(),
     enabled: Boolean = true,
 ) {
@@ -66,23 +65,26 @@ private fun Dialog(
             onDismissRequest = { onDismiss() },
             containerColor = backgroundColor,
             confirmButton = {
-                if (loading) {
-                    CircularProgressIndicator()
-                } else {
-                    Button(
-                        onClick = {
-                            loading = true
-                            scope.launch(Dispatchers.IO) {
-                                onSubmit()
-                                loading = false
-                                onDismiss()
-                            }
-                        },
-                        colors = confirmButtonColors,
-                        content = confirmButtonContent,
-                        enabled = enabled
-                    )
-                }
+                Button(
+                    onClick = {
+                        loading = true
+                        scope.launch(Dispatchers.IO) {
+                            onSubmit()
+                            loading = false
+                            onDismiss()
+                        }
+                    },
+                    colors = confirmButtonColors,
+                    content = {
+                        if (loading) {
+                            CircularProgressIndicator(color = LocalContentColor.current, modifier = Modifier.size(25.dp))
+                        } else {
+                            confirmButtonIcon()
+                        }
+                        confirmButtonText()
+                    },
+                    enabled = enabled
+                )
             },
             dismissButton = {
                 Button(
