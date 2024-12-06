@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -7,8 +8,15 @@ plugins {
     alias(libs.plugins.compose)
 }
 
-@OptIn(ExperimentalWasmDsl::class)
+@OptIn(ExperimentalWasmDsl::class, ExperimentalKotlinGradlePluginApi::class)
 kotlin {
+    applyDefaultHierarchyTemplate {
+        common {
+            group("skia") {
+                withWasmJs()
+            }
+        }
+    }
     jvm()
     wasmJs {
         browser()

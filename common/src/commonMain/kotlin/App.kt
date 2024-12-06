@@ -21,33 +21,35 @@ fun BSInfoApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = MainScreen.valueOf(backStackEntry?.destination?.route ?: MainScreen.Customers.name)
 
-    Scaffold(bottomBar = {
-        BottomAppBar {
-            NavigationBar {
-                NavigationBarItem(
-                    currentScreen == MainScreen.Customers,
-                    { navController.navigate(MainScreen.Customers.name) },
-                    {
-                        Icon(Icons.Default.Person, contentDescription = null)
-                    },
-                    label = { Text("Customers") })
-                NavigationBarItem(
-                    currentScreen == MainScreen.Readings,
-                    { navController.navigate(MainScreen.Readings.name) },
-                    {
-                        Icon(Icons.Default.GasMeter, contentDescription = null)
-                    },
-                    label = { Text("Readings") })
+    AppTheme {
+        Scaffold(bottomBar = {
+            BottomAppBar {
+                NavigationBar {
+                    NavigationBarItem(
+                        currentScreen == MainScreen.Customers,
+                        { navController.navigate(MainScreen.Customers.name) },
+                        {
+                            Icon(Icons.Default.Person, contentDescription = null)
+                        },
+                        label = { Text("Customers") })
+                    NavigationBarItem(
+                        currentScreen == MainScreen.Readings,
+                        { navController.navigate(MainScreen.Readings.name) },
+                        {
+                            Icon(Icons.Default.GasMeter, contentDescription = null)
+                        },
+                        label = { Text("Readings") })
+                }
             }
-        }
-    }) {
-        NavHost(navController, startDestination = MainScreen.Customers.name) {
-            composable(route = MainScreen.Customers.name) {
-                CustomersScreen()
-            }
+        }) {
+            NavHost(navController, startDestination = MainScreen.Customers.name) {
+                composable(route = MainScreen.Customers.name) {
+                    CustomersScreen()
+                }
 
-            composable(route = MainScreen.Readings.name) {
-                ReadingsScreen()
+                composable(route = MainScreen.Readings.name) {
+                    ReadingsScreen()
+                }
             }
         }
     }

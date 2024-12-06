@@ -2,6 +2,9 @@
 kotlin = "2.1.0"
 compose = "1.8.0-dev1905"
 ktor = "3.0.1"
+jansi = "2.4.1"
+logback = "1.5.12"
+groovy = "3.0.22"
 
 [libraries]
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.1" }
@@ -14,6 +17,10 @@ ktor-client-resources = { group = "io.ktor", name = "ktor-client-resources", ver
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version = "2.8.2" }
+
+groovy = { group = "org.codehaus.groovy", name = "groovy", version.ref = "groovy" }
+jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
+logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

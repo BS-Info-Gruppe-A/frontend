@@ -1,0 +1,15 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%boldGreen(%d{yyyy-MM-dd}) %boldYellow(%d{HH:mm:ss}) %gray(|) %highlight(%5level) %gray(|) %boldMagenta(%40.40logger{40}) %gray(|) %msg%n</pattern>
+        </encoder>
+        <target>System.out</target>
+    </appender>
+
+    <logger name="io.ktor.util.random" level="ERROR" />
+
+    <root level="${env.ENVIRONMENT:-production}.equals('dev') ? DEBUG : INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>
