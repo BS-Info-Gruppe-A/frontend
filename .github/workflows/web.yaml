@@ -43,7 +43,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: web
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
