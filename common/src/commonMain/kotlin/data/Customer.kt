@@ -19,4 +19,12 @@ data class Customer(
 }
 
 @Serializable
+data class UpdatableCustomer(
+    val id: Uuid,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val gender: Customer.Gender? = null
+)
+
+@Serializable
 data class Customers(val customers: List<Customer>)

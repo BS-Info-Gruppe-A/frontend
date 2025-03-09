@@ -123,11 +123,11 @@ private fun ReadingCard(reading: Reading, model: ReadingsScreenModel) {
                     Row {
                         ReadingDetail(
                             icon = Icons.Filled.CalendarToday,
-                            text = readableFormat.format(reading.dateOfReading)
+                            text = readableFormat.format(reading.date)
                         )
                         ReadingDetail(
                             icon = Icons.Filled.ElectricMeter,
-                            text = reading.kindOfMeter.readableName
+                            text = reading.kind.readableName
                         )
                     }
                     Row {
