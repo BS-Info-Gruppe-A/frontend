@@ -35,7 +35,8 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)
 
-                implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.androidx.lifecycle.viewmodel.compose)
+                implementation(libs.androidx.navigation.compose)
 
                 api(libs.kotlinx.datetime)
                 api(compose.foundation)
@@ -43,7 +44,6 @@ kotlin {
                 api(compose.ui)
                 api(compose.materialIconsExtended)
                 api(compose.material3)
-                implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
             }
         }
 

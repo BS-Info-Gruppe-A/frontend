@@ -8,9 +8,7 @@ dependencies {
     implementation(projects.common)
     implementation(compose.desktop.currentOs)
 
-
     // Logging
-    implementation(libs.groovy)
     implementation(libs.jansi)
     implementation(libs.logback)
 }
