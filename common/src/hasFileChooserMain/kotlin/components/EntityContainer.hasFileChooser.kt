@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,9 +31,11 @@ data class Filter(val name: String, val extension: String)
 class FileDialogException(message: String?) : RuntimeException(message)
 class FileDialogCancelException : RuntimeException()
 
+expect val supportsBrowseDirectory: Boolean
 expect suspend fun openSaveDialog(vararg filters: Filter): Path
 expect suspend fun openLoadDialog(vararg filters: Filter): Path
 expect fun openFile(path: Path)
+expect fun browseDirectory(path: Path)
 
 private val LOG = KotlinLogging.logger { }
 
@@ -51,16 +54,24 @@ actual fun <T> HamburgerItems(
 
     DropdownMenuItem({ Text("Export") }, {
         scope.launch {
-            exportPath = openSaveDialog(*formats.keys.map {
-                Filter(it, it)
-            }.toTypedArray())
+            try {
+                exportPath = openSaveDialog(*formats.keys.map {
+                    Filter(it, it)
+                }.toTypedArray())
+            } catch (_: FileDialogCancelException) {
+                onClose()
+            }
         }
     }, leadingIcon = { Icon(Icons.AutoMirrored.Default.Login, "import") })
     DropdownMenuItem({ Text("Import") }, {
         scope.launch {
-            importPath = openLoadDialog(*formats.keys.map {
-                Filter(it, it)
-            }.toTypedArray())
+            try {
+                importPath = openLoadDialog(*formats.keys.map {
+                    Filter(it, it)
+                }.toTypedArray())
+            } catch (_: FileDialogCancelException) {
+                onClose()
+            }
         }
     }, leadingIcon = { Icon(Icons.AutoMirrored.Default.Logout, "export") })
 
@@ -72,15 +83,23 @@ actual fun <T> HamburgerItems(
 private fun <T> Exporter(exportPath: Path?, items: List<T>, serializer: KSerializer<T>, onClose: () -> Unit) =
     DataProcessor(
         exportPath, serializer, onClose,
-        done = { Text("") },
+        done = { Text("Exportvorgang abgeschlossen!") },
         running = { Text("Exportiere ...") },
         doneDescription = {
             Text(
                 exportPath.toString(),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { openFile(exportPath!!) }
+                modifier = Modifier.fillMaxWidth().clickable { openFile(exportPath!!) }
             )
+        },
+        additionalButtons = {
+            if (supportsBrowseDirectory) {
+                Button({ browseDirectory(exportPath!!) }) {
+                    Icon(Icons.Default.FolderOpen, "Open folder")
+                    Text("Open folder")
+                }
+            }
         },
         processor = items::export
     )
@@ -129,6 +148,7 @@ private fun <T> DataProcessor(
     done: @Composable () -> Unit,
     running: @Composable () -> Unit,
     doneDescription: @Composable () -> Unit,
+    additionalButtons: (@Composable () -> Unit)? = null,
     processor: suspend (StringFormat, Path, KSerializer<T>) -> Unit,
     onDone: () -> Unit = {}
 ) {
@@ -152,7 +172,6 @@ private fun <T> DataProcessor(
 
         AlertDialog(
             { if (!processing) onClose() },
-            {},
             icon = { Icon(Icons.AutoMirrored.Default.Logout, "Export") },
             title = {
                 if (invalidFileExtension) {
@@ -161,7 +180,8 @@ private fun <T> DataProcessor(
                     done()
                 }
             },
-            dismissButton = {
+            dismissButton = additionalButtons,
+            confirmButton = {
                 if (invalidFileExtension || !processing) {
                     Button(onClose) {
                         Icon(Icons.Default.Check, "Ok")

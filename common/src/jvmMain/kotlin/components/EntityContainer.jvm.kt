@@ -14,9 +14,10 @@ import java.awt.Frame
 import java.io.File
 import java.nio.ByteBuffer
 
-actual fun openFile(path: Path) {
-    Desktop.getDesktop().browseFileDirectory(File(path.toString()))
-}
+actual val supportsBrowseDirectory: Boolean = Desktop.getDesktop().isSupported(Desktop.Action.BROWSE_FILE_DIR)
+
+actual fun openFile(path: Path) = Desktop.getDesktop().open(File(path.toString()))
+actual fun browseDirectory(path: Path) = Desktop.getDesktop().browseFileDirectory(File(path.toString()))
 
 actual suspend fun openSaveDialog(vararg filters: Filter): Path {
     return if (System.getProperty("os.name").contains("OS X", ignoreCase = true)) {
@@ -60,22 +61,26 @@ private suspend fun openFileDialogNative(
     function: (PointerBuffer, NFDFilterItem.Buffer?) -> Int,
     vararg filters: Filter
 ): Path = withContext(Dispatchers.Loom) {
-    val output = MemoryStack.stackPush().use {
-        val pathPointer = it.mallocPointer(1)
-        val nfdFilters = if (filters.isNotEmpty()) NFDFilterItem.malloc(filters.size) else null
-        filters.forEachIndexed { index, (name, extension) ->
-            nfdFilters!!.get(index)
-                .name(it.UTF8(name))
-                .spec(it.UTF8(extension))
-        }
+    val output = try {
+        NativeFileDialog.NFD_Init()
+        MemoryStack.stackPush().use {
+            val pathPointer = it.mallocPointer(1)
+            val nfdFilters = if (filters.isNotEmpty()) NFDFilterItem.malloc(filters.size) else null
+            filters.forEachIndexed { index, (name, extension) ->
+                nfdFilters!!.get(index)
+                    .name(it.UTF8(name))
+                    .spec(it.UTF8(extension))
+            }
 
-
-        when (val response = function(pathPointer, nfdFilters)) {
-            NativeFileDialog.NFD_OKAY -> pathPointer.stringUTF8
-            NativeFileDialog.NFD_CANCEL -> throw FileDialogCancelException()
-            NativeFileDialog.NFD_ERROR -> throw FileDialogException(NativeFileDialog.NFD_GetError())
-            else -> error("Unknown response code: $response")
+            when (val response = function(pathPointer, nfdFilters)) {
+                NativeFileDialog.NFD_OKAY -> pathPointer.stringUTF8
+                NativeFileDialog.NFD_CANCEL -> throw FileDialogCancelException()
+                NativeFileDialog.NFD_ERROR -> throw FileDialogException(NativeFileDialog.NFD_GetError())
+                else -> error("Unknown response code: $response")
+            }
         }
+    } finally {
+        NativeFileDialog.NFD_Quit()
     }
 
     Path(output)
