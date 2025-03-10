@@ -75,7 +75,7 @@ inline fun <reified T> EntityContainer(
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    BigTastyBacon(importItem, items, serializer)
+                    BigTastyBacon(importItem, items, serializer, viewModel)
 
                     DockedSearchBar(
                         inputField = {
@@ -128,10 +128,16 @@ inline fun <reified T> EntityContainer(
 }
 
 @Composable
-expect fun <T> HamburgerItems(importItem: suspend (T) -> Unit, items: List<T>, serializer: KSerializer<T>)
+expect fun <T> HamburgerItems(
+    importItem: suspend (T) -> Unit,
+    onClose: () -> Unit,
+    items: List<T>,
+    serializer: KSerializer<T>,
+    model: EntityViewModel
+)
 
 @Composable
-fun <T> BigTastyBacon(importItem: suspend (T) -> Unit, items: List<T>, serializer: KSerializer<T>) {
+fun <T> BigTastyBacon(importItem: suspend (T) -> Unit, items: List<T>, serializer: KSerializer<T>, model: EntityViewModel) {
     var expanded by remember { mutableStateOf(false) }
 
     IconButton({ expanded = true }) {
@@ -143,6 +149,6 @@ fun <T> BigTastyBacon(importItem: suspend (T) -> Unit, items: List<T>, serialize
     }
 
     DropdownMenu(expanded, { expanded = false }) {
-        HamburgerItems(importItem, items, serializer)
+        HamburgerItems(importItem, { expanded = false }, items, serializer, model)
     }
 }

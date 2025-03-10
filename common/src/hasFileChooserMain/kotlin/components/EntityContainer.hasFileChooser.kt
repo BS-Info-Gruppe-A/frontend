@@ -37,7 +37,13 @@ expect fun openFile(path: Path)
 private val LOG = KotlinLogging.logger { }
 
 @Composable
-actual fun <T> HamburgerItems(importItem: suspend (T) -> Unit, items: List<T>, serializer: KSerializer<T>) {
+actual fun <T> HamburgerItems(
+    importItem: suspend (T) -> Unit,
+    onClose: () -> Unit,
+    items: List<T>,
+    serializer: KSerializer<T>,
+    model: EntityViewModel
+) {
     val scope = rememberCoroutineScope()
 
     var exportPath by remember { mutableStateOf<Path?>(null) }
@@ -58,8 +64,8 @@ actual fun <T> HamburgerItems(importItem: suspend (T) -> Unit, items: List<T>, s
         }
     }, leadingIcon = { Icon(Icons.AutoMirrored.Default.Logout, "export") })
 
-    Exporter(exportPath, items, serializer, { exportPath = null })
-    Importer(importPath, importItem, serializer, { importPath = null })
+    Exporter(exportPath, items, serializer) { exportPath = null; onClose() }
+    Importer(importPath, importItem, serializer, { importPath = null; onClose() }, model)
 }
 
 @Composable
@@ -84,10 +90,12 @@ private fun <T> Importer(
     importPath: Path?,
     importItem: suspend (T) -> Unit,
     serializer: KSerializer<T>,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    model: EntityViewModel
 ) {
     var successfulItems by remember(importPath) { mutableStateOf(0) }
     var failedItems by remember(importPath) { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     @Composable
     fun Report() {
@@ -99,6 +107,7 @@ private fun <T> Importer(
         done = { Text("Importvorgang abgeschlossen") },
         doneDescription = { Report() },
         running = { Report() },
+        onDone = { scope.launch { model.refresh() } },
         processor = { format, path, kSerializer ->
             val items = path.import(format, kSerializer)
             items.forEach {
@@ -120,7 +129,8 @@ private fun <T> DataProcessor(
     done: @Composable () -> Unit,
     running: @Composable () -> Unit,
     doneDescription: @Composable () -> Unit,
-    processor: suspend (StringFormat, Path, KSerializer<T>) -> Unit
+    processor: suspend (StringFormat, Path, KSerializer<T>) -> Unit,
+    onDone: () -> Unit = {}
 ) {
     var processing by remember(path) { mutableStateOf(true) }
     var invalidFileExtension by remember(path) { mutableStateOf(false) }
@@ -135,6 +145,7 @@ private fun <T> DataProcessor(
                 } else {
                     processor(format, path, serializer)
                 }
+                onDone()
                 processing = false
             }
         }
