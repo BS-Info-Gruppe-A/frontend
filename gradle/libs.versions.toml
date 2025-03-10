@@ -23,6 +23,9 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version = "2.9.0-alpha04" }
 androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version = "2.9.0-alpha14" }
 
+xmlutil = { group = "io.github.pdvrieze.xmlutil", name = "serialization", version = "0.90.3" }
+kotlinx-serialization-csv = { group = "app.softwork", name = "kotlinx-serialization-csv", version = "0.0.20" }
+
 jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 

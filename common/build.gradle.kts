@@ -40,6 +40,8 @@ kotlin {
                 implementation(libs.androidx.navigation.compose)
 
                 implementation(libs.kotlin.string.similarity)
+                implementation(libs.xmlutil)
+                implementation(libs.kotlinx.serialization.csv)
 
                 api(libs.kotlinx.datetime)
                 api(libs.kotlin.logging)
