@@ -1,10 +1,12 @@
 package eu.bsinfo.rest
 
 import eu.bsinfo.data.*
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.client.request.*
@@ -36,10 +38,18 @@ class Route {
     }
 }
 
+val LOG = KotlinLogging.logger {}
+
 class Client {
     private val client = HttpClient {
         install(ContentNegotiation) {
             json()
+        }
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) = LOG.debug { message }
+            }
+            level = LogLevel.ALL
         }
 
         install(Resources)

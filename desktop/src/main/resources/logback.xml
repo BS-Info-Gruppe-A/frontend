@@ -9,7 +9,7 @@
 
     <logger name="io.ktor.util.random" level="ERROR" />
 
-    <root level="${env.ENVIRONMENT:-production}.equals('dev') ? DEBUG : INFO">
+    <root level="DEBUG">
         <appender-ref ref="CONSOLE" />
     </root>
 </configuration>

@@ -1,11 +1,16 @@
 package eu.bsinfo
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GasMeter
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -41,8 +46,9 @@ fun BSInfoApp() {
                         label = { Text("Readings") })
                 }
             }
-        }) {
-            NavHost(navController, startDestination = MainScreen.Customers.name) {
+        }) {padding ->
+            NavHost(navController, startDestination = MainScreen.Customers.name,
+                modifier = Modifier.padding(padding).clickable(remember { MutableInteractionSource() }, indication = null) {}) {
                 composable(route = MainScreen.Customers.name) {
                     CustomersScreen()
                 }

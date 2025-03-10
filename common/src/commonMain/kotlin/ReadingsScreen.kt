@@ -1,49 +1,113 @@
 package eu.bsinfo
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.DeleteDialog
+import eu.bsinfo.components.EntityContainer
+import eu.bsinfo.components.EntityViewModel
 import eu.bsinfo.data.Reading
-import eu.bsinfo.data.readableFormat
+import eu.bsinfo.data.icon
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.formatLocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.*
 import kotlin.uuid.Uuid
 
 data class ReadingsScreenState(
     val isLoading: Boolean = true,
+    val isDatePickerDialogVisible: Boolean = false,
+    val isKindSheetVisible: Boolean = false,
+    val selectedStartDate: LocalDate? = null,
+    val selectedEndDate: LocalDate? = null,
+    val selectedKind: Reading.Kind? = null,
     val readings: List<Reading> = emptyList(),
-)
+) {
+    val dateRangeFormatted: String?
+        get() {
+            val startDate = selectedStartDate
+            val endDate = selectedEndDate
+            if (startDate == null) return null
 
-class ReadingsScreenModel(private val client: Client) : ViewModel() {
+            return buildString {
+                append(formatLocalDate(startDate))
+                if (endDate != null) {
+                    append(" - ")
+                    append(formatLocalDate(endDate))
+                }
+            }
+        }
+}
+
+class ReadingsScreenModel(private val client: Client) : ViewModel(), EntityViewModel {
     private val _uiState = MutableStateFlow(ReadingsScreenState())
     val uiState = _uiState.asStateFlow()
 
-    suspend fun refreshReadings() = withContext(Dispatchers.IO) {
-        _uiState.emit(uiState.value.copy(readings = client.getReadings().readings, isLoading = false))
+    fun openDateSheet() = _uiState.tryEmit(uiState.value.copy(isDatePickerDialogVisible = true))
+    fun closeDateSheet() = _uiState.tryEmit(uiState.value.copy(isDatePickerDialogVisible = false))
+    fun openKindPickerSheet() = _uiState.tryEmit(uiState.value.copy(isKindSheetVisible = true))
+    fun closeKindPickerSheet() = _uiState.tryEmit(uiState.value.copy(isKindSheetVisible = false))
+
+    suspend fun setDateRange(from: Long?, to: Long?) {
+        _uiState.tryEmit(
+            uiState.value.copy(
+                selectedStartDate = from?.toLocalDate(), selectedEndDate = to?.toLocalDate(),
+                isDatePickerDialogVisible = false, isLoading = true
+            )
+        )
+
+        refresh()
+    }
+
+    suspend fun setKind(kind: Reading.Kind?) {
+        _uiState.tryEmit(
+            uiState.value.copy(
+                selectedKind = kind, isKindSheetVisible = false, isLoading = true
+            )
+        )
+
+        refresh()
+    }
+
+    override suspend fun refresh() = withContext(Dispatchers.IO) {
+        val state = _uiState.value
+        _uiState.emit(
+            state.copy(
+                readings = client.getReadings(
+                    from = state.selectedStartDate, to = state.selectedEndDate, kind = state.selectedKind
+                ).readings, isLoading = false
+            )
+        )
     }
 
     suspend fun deleteReading(readingId: Uuid) = withContext(Dispatchers.IO) {
         client.deleteReading(readingId)
         _uiState.emit(uiState.value.copy(readings = uiState.value.readings.filter { it.id != readingId }))
+    }
+
+    private fun Long.toLocalDate(): LocalDate {
+        val dateTime = Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
+        return LocalDate(dateTime.year, dateTime.month, dateTime.dayOfMonth)
     }
 }
 
@@ -54,17 +118,17 @@ fun ReadingsScreen(
     model: ReadingsScreenModel = viewModel { ReadingsScreenModel(client) }
 ) {
     val state by model.uiState.collectAsState()
-    val scope = rememberCoroutineScope()
 
     if (state.isLoading) {
-        LaunchedEffect(state) { model.refreshReadings() }
+        LaunchedEffect(state) { model.refresh() }
     }
 
-    PullToRefreshBox(
-        state.isLoading,
-        { scope.launch { model.refreshReadings() } },
-        modifier = Modifier.fillMaxSize()
+    EntityContainer(
+        model,
+        addButtonIcon = { Icon(Icons.Default.Add, "Create") },
+        addButtonText = { Text("Ablesung erstellen") }
     ) {
+        Filters(model, modifier = Modifier.padding(vertical = 5.dp))
         LazyVerticalGrid(
             GridCells.Adaptive(260.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),
@@ -76,14 +140,136 @@ fun ReadingsScreen(
             }
         }
     }
+
+    DatePicker(state, model)
+    KindPicker(state, model)
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DatePicker(state: ReadingsScreenState, model: ReadingsScreenModel) {
+    if (state.isDatePickerDialogVisible) {
+        val picketState = rememberDateRangePickerState(
+            initialSelectedStartDateMillis = state.selectedStartDate?.atStartOfDayIn(TimeZone.currentSystemDefault())
+                ?.toEpochMilliseconds(),
+            initialSelectedEndDateMillis = state.selectedEndDate?.atStartOfDayIn(TimeZone.currentSystemDefault())
+                ?.toEpochMilliseconds(),
+        )
+        val scope = rememberCoroutineScope()
+
+        DatePickerDialog(
+            { model.closeDateSheet() }, confirmButton = {
+                TextButton(onClick = {
+                    scope.launch {
+                        model.setDateRange(picketState.selectedStartDateMillis, picketState.selectedEndDateMillis)
+                    }
+                }, enabled = picketState.selectedStartDateMillis != null) {
+                    Text("Ok")
+                }
+            }, dismissButton = {
+                TextButton(onClick = { model.closeDateSheet() }) {
+                    Text("Abbrechen")
+                }
+            }, modifier = Modifier.padding(vertical = 25.dp)
+        ) {
+            DateRangePicker(picketState)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KindPicker(state: ReadingsScreenState, model: ReadingsScreenModel) {
+    if (state.isKindSheetVisible) {
+        val scope = rememberCoroutineScope()
+        ModalBottomSheet(onDismissRequest = { model.closeKindPickerSheet() }) {
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(vertical = 10.dp)) {
+                Text(
+                    "Ablesungsart",
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
+                )
+                Spacer(Modifier.height(10.dp))
+
+                Reading.Kind.entries.forEach {
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .clickable { scope.launch { model.setKind(it) } }
+                            .padding(vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(it.icon, null)
+                        Text(it.readableName, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Filters(model: ReadingsScreenModel, modifier: Modifier = Modifier) {
+    val uiState by model.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp).horizontalScroll(rememberScrollState())
+    ) {
+        Filter(
+            onClick = { model.openDateSheet() },
+            onDismiss = { scope.launch { model.setDateRange(null, null) } },
+            label = {
+                val range = uiState.dateRangeFormatted ?: "Datum"
+                Text(range)
+            },
+            enabled = uiState.selectedStartDate != null,
+            leadingIcon = { Icon(Icons.Default.DateRange, "Date") }
+        )
+        Filter(
+            onClick = { model.openKindPickerSheet() },
+            onDismiss = { scope.launch { model.setKind(null) } },
+            label = { Text(uiState.selectedKind?.readableName ?: "Ablesungsart") },
+            enabled = uiState.selectedKind != null,
+            leadingIcon = { Icon(Icons.Default.ElectricMeter, "Kind") }
+        )
+
+        AssistChip(
+            onClick = { },
+            label = { Text("Kunde") },
+            trailingIcon = { Icon(Icons.Default.ArrowDropDown, "Kunde") },
+            leadingIcon = { Icon(Icons.Default.AccountBox, "Account") })
+    }
+}
+
+@Composable
+fun Filter(
+    onClick: () -> Unit,
+    onDismiss: () -> Unit,
+    label: @Composable () -> Unit,
+    enabled: Boolean,
+    leadingIcon: @Composable (() -> Unit)? = null,
+) {
+    FilterChip(
+        onClick = onClick,
+        label = label,
+        selected = enabled,
+        leadingIcon = leadingIcon,
+        trailingIcon = {
+            if (enabled) {
+                IconButton(onDismiss, Modifier.size(25.dp)) { Icon(Icons.Default.Close, "Dismiss") }
+            } else {
+                Icon(Icons.Default.ArrowDropDown, "Kunde")
+            }
+        })
 }
 
 @Composable
 private fun ReadingCard(reading: Reading, model: ReadingsScreenModel) {
     ElevatedCard(
         modifier = Modifier
-            .width(260.dp)
-            .height(150.dp)
+            .width(260.dp).wrapContentHeight()
             .padding(vertical = 7.dp)
     ) {
         Box(
@@ -123,17 +309,11 @@ private fun ReadingCard(reading: Reading, model: ReadingsScreenModel) {
                     Row {
                         ReadingDetail(
                             icon = Icons.Filled.CalendarToday,
-                            text = readableFormat.format(reading.date)
+                            text = formatLocalDate(reading.date)
                         )
                         ReadingDetail(
                             icon = Icons.Filled.ElectricMeter,
                             text = reading.kind.readableName
-                        )
-                    }
-                    Row {
-                        ReadingDetail(
-                            icon = Icons.AutoMirrored.Filled.Comment,
-                            text = reading.comment
                         )
                     }
                 }

@@ -31,6 +31,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.resources)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)
@@ -39,6 +40,7 @@ kotlin {
                 implementation(libs.androidx.navigation.compose)
 
                 api(libs.kotlinx.datetime)
+                api(libs.kotlin.logging)
                 api(compose.foundation)
                 api(compose.runtime)
                 api(compose.ui)
@@ -50,6 +52,12 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation(libs.ktor.client.okhttp)
+            }
+        }
+
+        wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
             }
         }
     }

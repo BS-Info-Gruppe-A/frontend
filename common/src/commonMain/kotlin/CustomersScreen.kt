@@ -5,11 +5,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -17,14 +17,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.DeleteDialog
+import eu.bsinfo.components.EntityContainer
+import eu.bsinfo.components.EntityViewModel
 import eu.bsinfo.data.Customer
-import eu.bsinfo.data.readableFormat
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.formatLocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
@@ -33,11 +34,11 @@ data class CustomersScreenState(
     val customers: List<Customer> = emptyList(),
 )
 
-class CustomersScreenModel(private val client: Client) : ViewModel() {
+class CustomersScreenModel(private val client: Client) : ViewModel(), EntityViewModel {
     private val _uiState = MutableStateFlow(CustomersScreenState())
     val uiState = _uiState.asStateFlow()
 
-    suspend fun refreshCustomers() = withContext(Dispatchers.IO) {
+    override suspend fun refresh() = withContext(Dispatchers.IO) {
         _uiState.emit(uiState.value.copy(customers = client.getCustomers().customers, isLoading = false))
     }
 
@@ -54,16 +55,14 @@ fun CustomersScreen(
     model: CustomersScreenModel = viewModel { CustomersScreenModel(client) }
 ) {
     val state by model.uiState.collectAsState()
-    val scope = rememberCoroutineScope()
 
     if (state.isLoading) {
-        LaunchedEffect(state) { model.refreshCustomers() }
+        LaunchedEffect(state) { model.refresh() }
     }
 
-    PullToRefreshBox(
-        state.isLoading,
-        { scope.launch { model.refreshCustomers() } },
-        modifier = Modifier.fillMaxSize()
+    EntityContainer(
+        model, addButtonIcon = { Icon(Icons.Default.Add, "Create") },
+        addButtonText = { Text("Kunden erstellen") }
     ) {
         LazyVerticalGrid(
             GridCells.Adaptive(260.dp),
@@ -115,7 +114,7 @@ private fun CustomerCard(customer: Customer, model: CustomersScreenModel) {
                     )
                     CustomerDetail(
                         icon = Icons.Filled.Cake,
-                        text = readableFormat.format(customer.birthDate)
+                        text = formatLocalDate(customer.birthDate)
                     )
                 }
             }
