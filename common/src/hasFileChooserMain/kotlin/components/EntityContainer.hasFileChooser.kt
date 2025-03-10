@@ -16,11 +16,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.bsinfo.util.export
 import eu.bsinfo.util.formats
+import eu.bsinfo.util.import
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.StringFormat
 
 data class Filter(val name: String, val extension: String)
 
@@ -28,13 +31,17 @@ class FileDialogException(message: String?) : RuntimeException(message)
 class FileDialogCancelException : RuntimeException()
 
 expect suspend fun openSaveDialog(vararg filters: Filter): Path
+expect suspend fun openLoadDialog(vararg filters: Filter): Path
 expect fun openFile(path: Path)
 
+private val LOG = KotlinLogging.logger { }
+
 @Composable
-actual fun <T> HamburgerItems(items: List<T>, serializer: KSerializer<T>) {
+actual fun <T> HamburgerItems(importItem: suspend (T) -> Unit, items: List<T>, serializer: KSerializer<T>) {
     val scope = rememberCoroutineScope()
 
     var exportPath by remember { mutableStateOf<Path?>(null) }
+    var importPath by remember { mutableStateOf<Path?>(null) }
 
     DropdownMenuItem({ Text("Export") }, {
         scope.launch {
@@ -43,25 +50,90 @@ actual fun <T> HamburgerItems(items: List<T>, serializer: KSerializer<T>) {
             }.toTypedArray())
         }
     }, leadingIcon = { Icon(Icons.AutoMirrored.Default.Login, "import") })
-    DropdownMenuItem({ Text("Import") }, {}, leadingIcon = { Icon(Icons.AutoMirrored.Default.Logout, "export") })
+    DropdownMenuItem({ Text("Import") }, {
+        scope.launch {
+            importPath = openLoadDialog(*formats.keys.map {
+                Filter(it, it)
+            }.toTypedArray())
+        }
+    }, leadingIcon = { Icon(Icons.AutoMirrored.Default.Logout, "export") })
 
     Exporter(exportPath, items, serializer, { exportPath = null })
+    Importer(importPath, importItem, serializer, { importPath = null })
 }
 
 @Composable
-private fun <T> Exporter(exportPath: Path?, items: List<T>, serializer: KSerializer<T>, onClose: () -> Unit) {
-    var processing by remember(exportPath) { mutableStateOf(true) }
-    var invalidFileExtension by remember(exportPath) { mutableStateOf(false) }
+private fun <T> Exporter(exportPath: Path?, items: List<T>, serializer: KSerializer<T>, onClose: () -> Unit) =
+    DataProcessor(
+        exportPath, serializer, onClose,
+        done = { Text("") },
+        running = { Text("Exportiere ...") },
+        doneDescription = {
+            Text(
+                exportPath.toString(),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { openFile(exportPath!!) }
+            )
+        },
+        processor = items::export
+    )
 
-    if (exportPath != null) {
-        LaunchedEffect(exportPath) {
+@Composable
+private fun <T> Importer(
+    importPath: Path?,
+    importItem: suspend (T) -> Unit,
+    serializer: KSerializer<T>,
+    onClose: () -> Unit
+) {
+    var successfulItems by remember(importPath) { mutableStateOf(0) }
+    var failedItems by remember(importPath) { mutableStateOf(0) }
+
+    @Composable
+    fun Report() {
+        Text("Erfolgreich: $successfulItems. Fehlgeschlagen: $failedItems")
+    }
+
+    DataProcessor(
+        importPath, serializer, onClose,
+        done = { Text("Importvorgang abgeschlossen") },
+        doneDescription = { Report() },
+        running = { Report() },
+        processor = { format, path, kSerializer ->
+            val items = path.import(format, kSerializer)
+            items.forEach {
+                try {
+                    importItem(it)
+                    successfulItems++
+                } catch (e: Exception) {
+                    LOG.warn(e) { "Failed to import item" }
+                    failedItems++
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun <T> DataProcessor(
+    path: Path?, serializer: KSerializer<T>, onClose: () -> Unit,
+    done: @Composable () -> Unit,
+    running: @Composable () -> Unit,
+    doneDescription: @Composable () -> Unit,
+    processor: suspend (StringFormat, Path, KSerializer<T>) -> Unit
+) {
+    var processing by remember(path) { mutableStateOf(true) }
+    var invalidFileExtension by remember(path) { mutableStateOf(false) }
+
+    if (path != null) {
+        LaunchedEffect(path) {
             withContext(Dispatchers.IO) {
-                val extension = exportPath.name.substringAfterLast('.')
+                val extension = path.name.substringAfterLast('.')
                 val format = formats[extension]
                 if (format == null) {
                     invalidFileExtension = true
                 } else {
-                    items.export(format, exportPath, serializer)
+                    processor(format, path, serializer)
                 }
                 processing = false
             }
@@ -75,7 +147,7 @@ private fun <T> Exporter(exportPath: Path?, items: List<T>, serializer: KSeriali
                 if (invalidFileExtension) {
                     Text("Ungültige Dateiendung!")
                 } else if (!processing) {
-                    Text("Erfolgreich exportiert")
+                    done()
                 }
             },
             dismissButton = {
@@ -96,14 +168,10 @@ private fun <T> Exporter(exportPath: Path?, items: List<T>, serializer: KSeriali
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         CircularProgressIndicator()
-                        Text("Exportiere ...", textAlign = TextAlign.Center)
+                        running()
                     }
                 } else {
-                    Text(
-                        exportPath.toString(),
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.clickable { openFile(exportPath) })
+                    doneDescription()
                 }
             }
         )

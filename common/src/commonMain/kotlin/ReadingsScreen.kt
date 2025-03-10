@@ -154,6 +154,7 @@ fun ReadingsScreen(
     EntityContainer(
         model,
         state.readings,
+        client::createReading,
         addButtonIcon = { Icon(Icons.Default.Add, "Create") },
         addButtonText = { Text("Ablesung erstellen") },
         searchPlaceholder = { Text("Suche nach meter id") }

@@ -54,6 +54,8 @@ class Client {
 
         install(Resources)
 
+        expectSuccess = true
+
         defaultRequest {
             url.takeFrom("https://api.hausfix.devs-from.asia")
         }

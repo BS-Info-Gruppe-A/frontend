@@ -70,6 +70,7 @@ fun CustomersScreen(
     EntityContainer(
         model,
         state.customers,
+        client::createCustomer,
         addButtonIcon = { Icon(Icons.Default.Add, "Create") },
         addButtonText = { Text("Kunden erstellen") },
         searchPlaceholder = { Text("Suche nach Kundenname") }
