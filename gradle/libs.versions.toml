@@ -1,14 +1,18 @@
 [versions]
 kotlin = "2.1.10"
+coroutines = "1.10.1"
 compose = "1.8.0-alpha04"
 ktor = "3.1.1"
 jansi = "2.4.1"
 logback = "1.5.17"
+lwjgl = "3.3.6"
 
 [libraries]
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.2" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.8.0" }
 kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version = "0.3" }
+kotlinx-coroutines-core = {group="org.jetbrains.kotlinx", name="kotlinx-coroutines-core", version.ref="coroutines"}
+kotlinx-coroutines-swing = {group="org.jetbrains.kotlinx", name="kotlinx-coroutines-swing", version.ref="coroutines"}
 
 kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version = "7.0.5" }
 kotlin-string-similarity = { group = "string-similarity-kotlin", name = "string-similarity", version = "unspecified" }
@@ -28,6 +32,9 @@ kotlinx-serialization-csv = { group = "app.softwork", name = "kotlinx-serializat
 
 jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+
+lwjgl = { group = "org.lwjgl", name = "lwjgl", version.ref = "lwjgl" }
+lwjgl-nfd = { group = "org.lwjgl", name = "lwjgl-nfd", version.ref = "lwjgl" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

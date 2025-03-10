@@ -1,5 +1,8 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -12,6 +15,9 @@ plugins {
 kotlin {
     applyDefaultHierarchyTemplate {
         common {
+            group("hasFileChooser") {
+                withJvm()
+            }
             group("skia") {
                 withWasmJs()
             }
@@ -30,6 +36,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.resources)
@@ -55,7 +62,10 @@ kotlin {
 
         jvmMain {
             dependencies {
+                implementation(libs.kotlinx.coroutines.swing)
                 implementation(libs.ktor.client.okhttp)
+                lwjglDependency(libs.lwjgl)
+                lwjglDependency(libs.lwjgl.nfd)
             }
         }
 
@@ -64,5 +74,39 @@ kotlin {
                 implementation(libs.kotlinx.browser)
             }
         }
+    }
+}
+
+fun KotlinDependencyHandler.lwjglDependency(dependency: ProviderConvertible<MinimalExternalModuleDependency>) =
+    lwjglDependency(dependency.asProvider())
+
+fun KotlinDependencyHandler.lwjglDependency(dependency: Provider<MinimalExternalModuleDependency>) {
+    implementation(dependency)
+    when (val host = HostManager.host) {
+        KonanTarget.MACOS_ARM64 -> implementation(project.dependencies.variantOf(dependency) {
+            classifier("natives-macos-arm64")
+        })
+
+        KonanTarget.MACOS_X64 -> implementation(project.dependencies.variantOf(dependency) {
+            classifier("natives-macos")
+        })
+
+        KonanTarget.MINGW_X64 -> implementation(project.dependencies.variantOf(dependency) {
+            classifier("natives-windows")
+        })
+
+        KonanTarget.LINUX_ARM64 -> implementation(project.dependencies.variantOf(dependency) {
+            classifier("natives-linux-arm")
+        })
+
+        KonanTarget.LINUX_ARM64 -> implementation(project.dependencies.variantOf(dependency) {
+            classifier("natives-linux-arm64")
+        })
+
+        KonanTarget.LINUX_X64 -> implementation(project.dependencies.variantOf(dependency) {
+            classifier("natives-linux")
+        })
+
+        else -> error("Unsupported Target: $host")
     }
 }

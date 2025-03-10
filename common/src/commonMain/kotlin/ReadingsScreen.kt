@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -154,6 +153,7 @@ fun ReadingsScreen(
 
     EntityContainer(
         model,
+        state.readings,
         addButtonIcon = { Icon(Icons.Default.Add, "Create") },
         addButtonText = { Text("Ablesung erstellen") },
         searchPlaceholder = { Text("Suche nach meter id") }
