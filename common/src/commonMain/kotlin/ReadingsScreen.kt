@@ -13,6 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,6 +30,8 @@ import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.formatLocalDate
+import eu.bsinfo.util.matching
+import eu.bsinfo.util.search
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,7 +54,7 @@ data class ReadingsScreenState(
     val selectedCustomer: Customer? = null,
     override val query: String = "",
     val readings: List<Reading> = emptyList(),
-): EntityViewState {
+) : EntityViewState {
     val dateRangeFormatted: String?
         get() {
             val startDate = selectedStartDate
@@ -79,7 +83,7 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     fun closeCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = false))
 
     override fun setSearchQuery(text: String) {
-        _uiState.tryEmit(_uiState.value.copy(query = text))
+        _uiState.tryEmit(_uiState.value.copy(query = text, readings = _uiState.value.readings.search(text)))
     }
 
     suspend fun setDateRange(from: Long?, to: Long?) {
@@ -151,7 +155,8 @@ fun ReadingsScreen(
     EntityContainer(
         model,
         addButtonIcon = { Icon(Icons.Default.Add, "Create") },
-        addButtonText = { Text("Ablesung erstellen") }
+        addButtonText = { Text("Ablesung erstellen") },
+        searchPlaceholder = { Text("Suche nach meter id") }
     ) {
         Filters(model, modifier = Modifier.padding(vertical = 5.dp))
         LazyVerticalGrid(
@@ -161,7 +166,7 @@ fun ReadingsScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             items(state.readings) { reading ->
-                ReadingCard(reading, model)
+                ReadingCard(reading, state.query, model)
             }
         }
     }
@@ -232,7 +237,7 @@ fun Filter(
 }
 
 @Composable
-private fun ReadingCard(reading: Reading, model: ReadingsScreenModel) {
+private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenModel) {
     ElevatedCard(
         modifier = Modifier
             .width(260.dp).wrapContentHeight()
@@ -248,8 +253,10 @@ private fun ReadingCard(reading: Reading, model: ReadingsScreenModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    val meterId = reading.matching(query)
+
                     Text(
-                        "Ablesung von ${reading.meterId}",
+                        AnnotatedString("Ablesung von ") + meterId,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier
                             .padding(horizontal = 10.dp, vertical = 7.dp)

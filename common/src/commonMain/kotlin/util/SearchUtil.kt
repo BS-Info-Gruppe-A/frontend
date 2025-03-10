@@ -6,19 +6,32 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.aallam.similarity.JaroWinkler
 import eu.bsinfo.data.Customer
+import eu.bsinfo.data.Reading
+import kotlin.jvm.JvmName
 
 private val separator = "\\s+".toRegex()
 
 private val comparator = JaroWinkler()
 
+@JvmName("searchCustomer")
 fun Iterable<Customer>.search(query: String) = asSequence()
     .map { it to comparator.similarity(query, it.fullName) }
     .sortedByDescending { (_, score) -> score }
     .map { (customer) -> customer }
     .toList()
 
+@JvmName("searchReading")
+fun Iterable<Reading>.search(meterId: String) = asSequence()
+    .map { it to comparator.similarity(meterId, it.meterId) }
+    .sortedByDescending { (_, score) -> score }
+    .map { (customer) -> customer }
+    .toList()
+
 @Composable
 fun Customer.matchingName(matchingWith: String) = fullName.matching(matchingWith)
+
+@Composable
+fun Reading.matching(matchingWith: String) = meterId.matching(matchingWith)
 
 @Composable
 fun String.matching(matchingWith: String) = buildAnnotatedString {
