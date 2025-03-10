@@ -27,3 +27,5 @@ actual fun isSystemInDarkMode(): Boolean {
 
     return darkTheme
 }
+
+actual val isMobile: Boolean = false

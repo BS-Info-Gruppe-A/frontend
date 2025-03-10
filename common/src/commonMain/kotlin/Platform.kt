@@ -9,3 +9,5 @@ expect val Dispatchers.IO: CoroutineDispatcher
 
 @Composable
 expect fun isSystemInDarkMode(): Boolean
+
+expect val isMobile: Boolean

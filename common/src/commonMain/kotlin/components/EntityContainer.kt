@@ -14,9 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import eu.bsinfo.isMobile
 import kotlinx.coroutines.launch
-
-val isMobile: Boolean = false
 
 interface EntityViewModel {
     suspend fun refresh()
