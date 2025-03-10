@@ -23,7 +23,7 @@ kotlin {
     }
 
     compilerOptions {
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+        optIn.addAll("kotlin.uuid.ExperimentalUuidApi", "androidx.compose.material3.ExperimentalMaterial3Api")
     }
 
     sourceSets {
@@ -38,6 +38,8 @@ kotlin {
 
                 implementation(libs.androidx.lifecycle.viewmodel.compose)
                 implementation(libs.androidx.navigation.compose)
+
+                implementation(libs.kotlin.string.similarity)
 
                 api(libs.kotlinx.datetime)
                 api(libs.kotlin.logging)

@@ -1,6 +1,5 @@
 package eu.bsinfo
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,15 +13,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.DeleteDialog
 import eu.bsinfo.components.EntityContainer
 import eu.bsinfo.components.EntityViewModel
+import eu.bsinfo.components.readings.CustomerPicker
+import eu.bsinfo.components.readings.KindPicker
+import eu.bsinfo.components.readings.ReadingDatePicker
+import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
-import eu.bsinfo.data.icon
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.formatLocalDate
@@ -31,16 +32,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.*
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.uuid.Uuid
 
 data class ReadingsScreenState(
     val isLoading: Boolean = true,
     val isDatePickerDialogVisible: Boolean = false,
     val isKindSheetVisible: Boolean = false,
+    val isCustomerSheetVisible: Boolean = false,
     val selectedStartDate: LocalDate? = null,
     val selectedEndDate: LocalDate? = null,
     val selectedKind: Reading.Kind? = null,
+    val selectedCustomer: Customer? = null,
     val readings: List<Reading> = emptyList(),
 ) {
     val dateRangeFormatted: String?
@@ -59,7 +65,7 @@ data class ReadingsScreenState(
         }
 }
 
-class ReadingsScreenModel(private val client: Client) : ViewModel(), EntityViewModel {
+class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     private val _uiState = MutableStateFlow(ReadingsScreenState())
     val uiState = _uiState.asStateFlow()
 
@@ -67,6 +73,8 @@ class ReadingsScreenModel(private val client: Client) : ViewModel(), EntityViewM
     fun closeDateSheet() = _uiState.tryEmit(uiState.value.copy(isDatePickerDialogVisible = false))
     fun openKindPickerSheet() = _uiState.tryEmit(uiState.value.copy(isKindSheetVisible = true))
     fun closeKindPickerSheet() = _uiState.tryEmit(uiState.value.copy(isKindSheetVisible = false))
+    fun openCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = true))
+    fun closeCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = false))
 
     suspend fun setDateRange(from: Long?, to: Long?) {
         _uiState.tryEmit(
@@ -89,12 +97,23 @@ class ReadingsScreenModel(private val client: Client) : ViewModel(), EntityViewM
         refresh()
     }
 
+    suspend fun setCustomer(customer: Customer?) {
+        _uiState.tryEmit(
+            uiState.value.copy(
+                selectedCustomer = customer, isCustomerSheetVisible = false, isLoading = true
+            )
+        )
+
+        refresh()
+    }
+
     override suspend fun refresh() = withContext(Dispatchers.IO) {
         val state = _uiState.value
         _uiState.emit(
             state.copy(
                 readings = client.getReadings(
-                    from = state.selectedStartDate, to = state.selectedEndDate, kind = state.selectedKind
+                    from = state.selectedStartDate, to = state.selectedEndDate, kind = state.selectedKind,
+                    customerId = state.selectedCustomer?.id
                 ).readings, isLoading = false
             )
         )
@@ -111,13 +130,13 @@ class ReadingsScreenModel(private val client: Client) : ViewModel(), EntityViewM
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadingsScreen(
     client: Client = LocalClient.current,
     model: ReadingsScreenModel = viewModel { ReadingsScreenModel(client) }
 ) {
     val state by model.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
 
     if (state.isLoading) {
         LaunchedEffect(state) { model.refresh() }
@@ -141,72 +160,11 @@ fun ReadingsScreen(
         }
     }
 
-    DatePicker(state, model)
+    ReadingDatePicker(state, model)
     KindPicker(state, model)
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun DatePicker(state: ReadingsScreenState, model: ReadingsScreenModel) {
-    if (state.isDatePickerDialogVisible) {
-        val picketState = rememberDateRangePickerState(
-            initialSelectedStartDateMillis = state.selectedStartDate?.atStartOfDayIn(TimeZone.currentSystemDefault())
-                ?.toEpochMilliseconds(),
-            initialSelectedEndDateMillis = state.selectedEndDate?.atStartOfDayIn(TimeZone.currentSystemDefault())
-                ?.toEpochMilliseconds(),
-        )
-        val scope = rememberCoroutineScope()
-
-        DatePickerDialog(
-            { model.closeDateSheet() }, confirmButton = {
-                TextButton(onClick = {
-                    scope.launch {
-                        model.setDateRange(picketState.selectedStartDateMillis, picketState.selectedEndDateMillis)
-                    }
-                }, enabled = picketState.selectedStartDateMillis != null) {
-                    Text("Ok")
-                }
-            }, dismissButton = {
-                TextButton(onClick = { model.closeDateSheet() }) {
-                    Text("Abbrechen")
-                }
-            }, modifier = Modifier.padding(vertical = 25.dp)
-        ) {
-            DateRangePicker(picketState)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun KindPicker(state: ReadingsScreenState, model: ReadingsScreenModel) {
-    if (state.isKindSheetVisible) {
-        val scope = rememberCoroutineScope()
-        ModalBottomSheet(onDismissRequest = { model.closeKindPickerSheet() }) {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(vertical = 10.dp)) {
-                Text(
-                    "Ablesungsart",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
-                )
-                Spacer(Modifier.height(10.dp))
-
-                Reading.Kind.entries.forEach {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .clickable { scope.launch { model.setKind(it) } }
-                            .padding(vertical = 15.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(it.icon, null)
-                        Text(it.readableName, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-        }
-    }
+    CustomerPicker(client, state.isCustomerSheetVisible, { model.closeCustomerSheet() }, {
+        scope.launch { model.setCustomer(it) }
+    })
 }
 
 @Composable
@@ -235,11 +193,13 @@ private fun Filters(model: ReadingsScreenModel, modifier: Modifier = Modifier) {
             leadingIcon = { Icon(Icons.Default.ElectricMeter, "Kind") }
         )
 
-        AssistChip(
-            onClick = { },
-            label = { Text("Kunde") },
-            trailingIcon = { Icon(Icons.Default.ArrowDropDown, "Kunde") },
-            leadingIcon = { Icon(Icons.Default.AccountBox, "Account") })
+        Filter(
+            onClick = { model.openCustomerSheet() },
+            onDismiss = { scope.launch { model.setCustomer(null) } },
+            label = { Text(uiState.selectedCustomer?.fullName ?: "Kunde") },
+            enabled = uiState.selectedCustomer != null,
+            leadingIcon = { Icon(Icons.Default.AccountBox, "Account") }
+        )
     }
 }
 

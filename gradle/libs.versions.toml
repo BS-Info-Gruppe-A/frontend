@@ -11,6 +11,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version = "0.3" }
 
 kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version = "7.0.5" }
+kotlin-string-similarity = { group = "string-similarity-kotlin", name = "string-similarity", version = "unspecified" }
 
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
