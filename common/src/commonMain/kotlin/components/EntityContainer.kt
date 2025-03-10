@@ -15,10 +15,18 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import eu.bsinfo.isMobile
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+interface EntityViewState {
+    val query: String
+}
+
 interface EntityViewModel {
+    val uiState: StateFlow<EntityViewState>
     suspend fun refresh()
+
+    fun setSearchQuery(text: String)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,9 +35,10 @@ fun EntityContainer(
     viewModel: EntityViewModel,
     addButtonIcon: @Composable () -> Unit = {},
     addButtonText: @Composable () -> Unit = {},
+    searchPlaceholder: @Composable () -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    val state by viewModel.uiState.collectAsState()
     var isRefreshing by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -63,10 +72,11 @@ fun EntityContainer(
                         var refreshing by remember { mutableStateOf(false) }
 
                         SearchBarDefaults.InputField(
-                            searchQuery, { searchQuery = it },
+                            state.query, viewModel::setSearchQuery,
                             expanded = false,
+                            placeholder = searchPlaceholder,
                             onExpandedChange = {},
-                            onSearch = { searchQuery = it },
+                            onSearch = { },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                             trailingIcon = {
                                 if (!isMobile) { // On mobile you can use pull to refresh

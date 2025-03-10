@@ -19,10 +19,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.DeleteDialog
 import eu.bsinfo.components.EntityContainer
 import eu.bsinfo.components.EntityViewModel
+import eu.bsinfo.components.EntityViewState
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.formatLocalDate
+import eu.bsinfo.util.matchingName
+import eu.bsinfo.util.search
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,11 +35,16 @@ import kotlin.uuid.Uuid
 data class CustomersScreenState(
     val isLoading: Boolean = true,
     val customers: List<Customer> = emptyList(),
-)
+    override val query: String = "",
+) : EntityViewState
 
 class CustomersScreenModel(private val client: Client) : ViewModel(), EntityViewModel {
     private val _uiState = MutableStateFlow(CustomersScreenState())
-    val uiState = _uiState.asStateFlow()
+    override val uiState = _uiState.asStateFlow()
+
+    override fun setSearchQuery(text: String) {
+        _uiState.tryEmit(_uiState.value.copy(query = text, customers = _uiState.value.customers.search(text)))
+    }
 
     override suspend fun refresh() = withContext(Dispatchers.IO) {
         _uiState.emit(uiState.value.copy(customers = client.getCustomers().customers, isLoading = false))
@@ -48,7 +56,6 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomersScreen(
     client: Client = LocalClient.current,
@@ -61,8 +68,10 @@ fun CustomersScreen(
     }
 
     EntityContainer(
-        model, addButtonIcon = { Icon(Icons.Default.Add, "Create") },
-        addButtonText = { Text("Kunden erstellen") }
+        model,
+        addButtonIcon = { Icon(Icons.Default.Add, "Create") },
+        addButtonText = { Text("Kunden erstellen") },
+        searchPlaceholder = { Text("Suche nach Kundenname") }
     ) {
         LazyVerticalGrid(
             GridCells.Adaptive(260.dp),
@@ -71,14 +80,14 @@ fun CustomersScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             items(state.customers) { customer ->
-                CustomerCard(customer, model)
+                CustomerCard(customer, state.query, model)
             }
         }
     }
 }
 
 @Composable
-private fun CustomerCard(customer: Customer, model: CustomersScreenModel) {
+private fun CustomerCard(customer: Customer, query: String, model: CustomersScreenModel) {
     ElevatedCard(
         modifier = Modifier
             .width(260.dp)
@@ -96,7 +105,7 @@ private fun CustomerCard(customer: Customer, model: CustomersScreenModel) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        customer.fullName,
+                        customer.matchingName(query),
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier
                             .padding(horizontal = 10.dp, vertical = 7.dp)

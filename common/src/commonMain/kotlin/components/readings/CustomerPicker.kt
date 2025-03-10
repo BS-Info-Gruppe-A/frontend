@@ -9,8 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,11 +16,12 @@ import com.aallam.similarity.JaroWinkler
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.Client
 import eu.bsinfo.util.focusable
+import eu.bsinfo.util.matchingName
+import eu.bsinfo.util.search
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private val seperator = "\\s+".toRegex()
 
 data class State(
     val customers: List<Customer>? = null,
@@ -41,16 +40,9 @@ class CustomerPickerViewModel(private val client: Client) : ViewModel() {
     }
 
     fun search(query: String) {
-        val comparator = JaroWinkler()
         _uiState.tryEmit(
             _uiState.value.copy(
-                customers = uiState.value.customers?.let {
-                    it.asSequence()
-                        .map { it to comparator.similarity(query, it.fullName) }
-                        .sortedByDescending { (_, score) -> score }
-                        .map { (customer) -> customer }
-                        .toList()
-                }
+                customers = uiState.value.customers?.search(query)
             )
         )
     }
@@ -72,20 +64,6 @@ fun CustomerPicker(
     val sheetState = rememberModalBottomSheetState()
 
     val currentState = state
-
-    @Composable
-    fun Customer.matchingName() = buildAnnotatedString {
-        val highlighter = SpanStyle(background = MaterialTheme.colorScheme.tertiary)
-        append(fullName)
-
-        search.split(seperator).forEach {
-            if (it.isNotBlank()) {
-                it.toRegex(RegexOption.IGNORE_CASE).findAll(fullName).forEach { match ->
-                    addStyle(highlighter, match.range.first, match.range.last + 1)
-                }
-            }
-        }
-    }
 
     if (isVisible) {
         Sheet("Kunde", onDismissRequest, state = sheetState, modifier = modifier.fillMaxHeight(.8f).focusable()) {
@@ -112,7 +90,7 @@ fun CustomerPicker(
                 currentState.customers.forEach { customer ->
                     SelectableRow({ onSelect(customer) }) {
                         Icon(Icons.Default.AccountCircle, "Customer")
-                        Text(customer.matchingName())
+                        Text(customer.matchingName(search))
                     }
                 }
             }

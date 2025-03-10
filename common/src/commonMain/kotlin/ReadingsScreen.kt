@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.DeleteDialog
 import eu.bsinfo.components.EntityContainer
 import eu.bsinfo.components.EntityViewModel
+import eu.bsinfo.components.EntityViewState
 import eu.bsinfo.components.readings.CustomerPicker
 import eu.bsinfo.components.readings.KindPicker
 import eu.bsinfo.components.readings.ReadingDatePicker
@@ -47,8 +48,9 @@ data class ReadingsScreenState(
     val selectedEndDate: LocalDate? = null,
     val selectedKind: Reading.Kind? = null,
     val selectedCustomer: Customer? = null,
+    override val query: String = "",
     val readings: List<Reading> = emptyList(),
-) {
+): EntityViewState {
     val dateRangeFormatted: String?
         get() {
             val startDate = selectedStartDate
@@ -67,7 +69,7 @@ data class ReadingsScreenState(
 
 class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     private val _uiState = MutableStateFlow(ReadingsScreenState())
-    val uiState = _uiState.asStateFlow()
+    override val uiState = _uiState.asStateFlow()
 
     fun openDateSheet() = _uiState.tryEmit(uiState.value.copy(isDatePickerDialogVisible = true))
     fun closeDateSheet() = _uiState.tryEmit(uiState.value.copy(isDatePickerDialogVisible = false))
@@ -75,6 +77,10 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     fun closeKindPickerSheet() = _uiState.tryEmit(uiState.value.copy(isKindSheetVisible = false))
     fun openCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = true))
     fun closeCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = false))
+
+    override fun setSearchQuery(text: String) {
+        _uiState.tryEmit(_uiState.value.copy(query = text))
+    }
 
     suspend fun setDateRange(from: Long?, to: Long?) {
         _uiState.tryEmit(
