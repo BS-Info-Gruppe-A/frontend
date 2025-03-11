@@ -176,9 +176,9 @@ fun <T> BigTastyBacon(
 @Composable
 fun <T> DataProcessor(
     path: FileHandle?, serializer: KSerializer<T>, onClose: () -> Unit,
-    done: @Composable () -> Unit,
-    running: @Composable () -> Unit,
-    doneDescription: @Composable () -> Unit,
+    done: @Composable () -> Unit = {},
+    running: @Composable () -> Unit = {},
+    doneDescription: @Composable () -> Unit = {},
     additionalButtons: (@Composable () -> Unit)? = null,
     processor: suspend (StringFormat, FileHandle, KSerializer<T>) -> Unit,
     onDone: () -> Unit = {}
