@@ -62,7 +62,7 @@ jobs:
         with:
           tag_name: ${{ github.run_number }}
           files: |
-            app/desktop/build/compose/binaries/main-release/deb/*.deb
-            app/desktop/build/compose/binaries/main-release/pkg/*.pkg
-            app/desktop/build/compose/binaries/main-release/rpm/*.rpm
-            app/desktop/build/compose/binaries/main-release/msi/*.msi
+            desktop/build/compose/binaries/main-release/deb/*.deb
+            desktop/build/compose/binaries/main-release/pkg/*.pkg
+            desktop/build/compose/binaries/main-release/rpm/*.rpm
+            desktop/build/compose/binaries/main-release/msi/*.msi
