@@ -10,7 +10,8 @@ crate-type = ["cdylib", "lib"]
 safer-ffi = "0.1.12"
 
 [dependencies.rfd]
-version = "0.15.2"
+git = "https://github.com/PolyMeilex/rfd.git"
+rev = "24842c4"
 default-features = false
 features = ["xdg-portal"]
 
