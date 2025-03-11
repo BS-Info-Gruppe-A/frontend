@@ -9,9 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import eu.bsinfo.util.FileDialogCancelException
+import eu.bsinfo.file_dialog.FileDialogCancelException
+import eu.bsinfo.file_dialog.Filter
 import kotlinx.serialization.KSerializer
-import eu.bsinfo.util.Filter
 import eu.bsinfo.util.formats
 import eu.bsinfo.util.FileHandle
 import kotlinx.coroutines.launch

@@ -1,0 +1,18 @@
+[package]
+name = "native_helper"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+rfd = "0.15.2"
+safer-ffi = "0.1.12"
+
+[[bin]]
+name = "generate-headers"
+required-features = ["headers"]
+
+[features]
+headers = ["safer-ffi/headers"]

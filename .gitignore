@@ -119,3 +119,5 @@ gradle-app.setting
 
 .kotlin/
 .idea/artifacts
+
+native_helper/target

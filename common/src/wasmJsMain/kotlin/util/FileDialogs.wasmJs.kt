@@ -1,5 +1,7 @@
 package eu.bsinfo.util
 
+import eu.bsinfo.file_dialog.FileDialogCancelException
+import eu.bsinfo.file_dialog.Filter
 import kotlinx.browser.document
 import kotlinx.dom.createElement
 import org.w3c.dom.HTMLInputElement

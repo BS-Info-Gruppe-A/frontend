@@ -36,6 +36,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation(projects.fileDialog)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ktor.client.core)
@@ -63,10 +64,9 @@ kotlin {
 
         jvmMain {
             dependencies {
-                implementation(libs.kotlinx.coroutines.swing)
+                implementation(projects.nativeHelper)
                 implementation(libs.ktor.client.okhttp)
-                lwjglDependency(libs.lwjgl)
-                lwjglDependency(libs.lwjgl.nfd)
+                implementation(libs.kotlinx.coroutines.swing)
             }
         }
 

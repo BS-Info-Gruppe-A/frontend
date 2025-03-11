@@ -1,7 +1,7 @@
 package eu.bsinfo.components
 
+import eu.bsinfo.file_dialog.Filter
 import eu.bsinfo.util.FileHandle
-import eu.bsinfo.util.Filter
 import kotlinx.io.buffered
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.writeString
