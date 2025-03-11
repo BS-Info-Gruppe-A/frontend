@@ -1,25 +1,52 @@
-package eu.bsinfo.components
+package eu.bsinfo.util
 
 import eu.bsinfo.Loom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.Source
+import kotlinx.io.buffered
 import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
 import org.lwjgl.PointerBuffer
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.util.nfd.NFDFilterItem
 import org.lwjgl.util.nfd.NativeFileDialog
-import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
 import java.nio.ByteBuffer
 
-actual val supportsBrowseDirectory: Boolean = Desktop.getDesktop().isSupported(Desktop.Action.BROWSE_FILE_DIR)
+actual class FileHandle(val delegate: Path) {
+    actual val name: String get() = delegate.name
+    fun asFile() = File(delegate.toString())
+    actual suspend fun read(): String = withContext(Dispatchers.Loom) {
+        SystemFileSystem.source(delegate).buffered().use(Source::readString)
+    }
 
-actual fun openFile(path: Path) = Desktop.getDesktop().open(File(path.toString()))
-actual fun browseDirectory(path: Path) = Desktop.getDesktop().browseFileDirectory(File(path.toString()))
+    override fun toString(): String = delegate.toString()
+}
 
-actual suspend fun openSaveDialog(vararg filters: Filter): Path {
+actual suspend fun chooseFile(vararg filters: Filter): FileHandle? {
+    val path = openLoadDialog(*filters)
+    return FileHandle(path)
+}
+
+suspend fun openLoadDialog(vararg filters: Filter): Path {
+    return if (System.getProperty("os.name").contains("OS X", ignoreCase = true)) {
+        openFileDialogAwt(FileDialog.LOAD)
+    } else {
+        openFileDialogNative({ output, nfdFilters ->
+            NativeFileDialog.NFD_OpenDialog(
+                output,
+                nfdFilters,
+                null as ByteBuffer?
+            )
+        }, *filters)
+    }
+}
+
+suspend fun openSaveDialog(vararg filters: Filter): Path {
     return if (System.getProperty("os.name").contains("OS X", ignoreCase = true)) {
         openFileDialogAwt(FileDialog.SAVE)
     } else {
@@ -29,20 +56,6 @@ actual suspend fun openSaveDialog(vararg filters: Filter): Path {
                 nfdFilters,
                 null as ByteBuffer?,
                 null
-            )
-        }, *filters)
-    }
-}
-
-actual suspend fun openLoadDialog(vararg filters: Filter): Path {
-    return if (System.getProperty("os.name").contains("OS X", ignoreCase = true)) {
-        openFileDialogAwt(FileDialog.LOAD)
-    } else {
-        openFileDialogNative({ output, nfdFilters ->
-            NativeFileDialog.NFD_OpenDialog(
-                output,
-                nfdFilters,
-                null as ByteBuffer?
             )
         }, *filters)
     }

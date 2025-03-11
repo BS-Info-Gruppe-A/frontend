@@ -15,7 +15,7 @@ plugins {
 kotlin {
     applyDefaultHierarchyTemplate {
         common {
-            group("hasFileChooser") {
+            group("fileChooser") {
                 withJvm()
             }
             group("skia") {
@@ -30,6 +30,7 @@ kotlin {
 
     compilerOptions {
         optIn.addAll("kotlin.uuid.ExperimentalUuidApi", "androidx.compose.material3.ExperimentalMaterial3Api")
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
     sourceSets {

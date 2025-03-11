@@ -5,6 +5,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -15,11 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.bsinfo.isMobile
+import eu.bsinfo.util.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.serializer
 
 interface EntityViewState {
@@ -128,17 +134,17 @@ inline fun <reified T> EntityContainer(
 }
 
 @Composable
-expect fun <T> HamburgerItems(
+fun <T> BigTastyBacon(
     importItem: suspend (T) -> Unit,
-    onClose: () -> Unit,
     items: List<T>,
     serializer: KSerializer<T>,
     model: EntityViewModel
-)
+) {
+    val scope = rememberCoroutineScope()
+    val exporterState = rememberExporterState()
 
-@Composable
-fun <T> BigTastyBacon(importItem: suspend (T) -> Unit, items: List<T>, serializer: KSerializer<T>, model: EntityViewModel) {
     var expanded by remember { mutableStateOf(false) }
+    var importPath by remember { mutableStateOf<FileHandle?>(null) }
 
     IconButton({ expanded = true }) {
         Icon(
@@ -149,6 +155,85 @@ fun <T> BigTastyBacon(importItem: suspend (T) -> Unit, items: List<T>, serialize
     }
 
     DropdownMenu(expanded, { expanded = false }) {
-        HamburgerItems(importItem, { expanded = false }, items, serializer, model)
+        DropdownMenuItem({ Text("Import") }, {
+            scope.launch {
+                try {
+                    importPath = chooseFile(*formats.keys.map {
+                        Filter(it, it)
+                    }.toTypedArray())
+                } catch (_: FileDialogCancelException) {
+                    expanded = false
+                }
+            }
+        }, leadingIcon = { Icon(Icons.AutoMirrored.Default.Login, "import") })
+        ExporterDropdownEntry(exporterState, { expanded = false })
+    }
+
+    Importer(importPath, importItem, serializer, { expanded = false }, model)
+    Exporter(exporterState, items, serializer, { expanded = false })
+}
+
+@Composable
+fun <T> DataProcessor(
+    path: FileHandle?, serializer: KSerializer<T>, onClose: () -> Unit,
+    done: @Composable () -> Unit,
+    running: @Composable () -> Unit,
+    doneDescription: @Composable () -> Unit,
+    additionalButtons: (@Composable () -> Unit)? = null,
+    processor: suspend (StringFormat, FileHandle, KSerializer<T>) -> Unit,
+    onDone: () -> Unit = {}
+) {
+    var processing by remember(path) { mutableStateOf(true) }
+    var invalidFileExtension by remember(path) { mutableStateOf(false) }
+
+    if (path != null) {
+        LaunchedEffect(path) {
+            val extension = path.extension
+            val format = formats[extension]
+            if (format == null) {
+                invalidFileExtension = true
+            } else {
+                processor(format, path, serializer)
+            }
+            onDone()
+            processing = false
+        }
+
+        AlertDialog(
+            { if (!processing) onClose() },
+            icon = { Icon(Icons.AutoMirrored.Default.Logout, "Export") },
+            title = {
+                if (invalidFileExtension) {
+                    Text("Ungültige Dateiendung!")
+                } else if (!processing) {
+                    done()
+                }
+            },
+            dismissButton = { if(!invalidFileExtension) additionalButtons?.invoke() },
+            confirmButton = {
+                if (invalidFileExtension || !processing) {
+                    Button(onClose) {
+                        Icon(Icons.Default.Check, "Ok")
+                        Text("OK")
+                    }
+                }
+            },
+            text = {
+                if (invalidFileExtension) {
+                    Text("Bitte verwende json, csv oder xml", textAlign = TextAlign.Center)
+                } else if (processing) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CircularProgressIndicator()
+                        running()
+                    }
+                } else {
+                    doneDescription()
+                }
+            }
+        )
     }
 }
