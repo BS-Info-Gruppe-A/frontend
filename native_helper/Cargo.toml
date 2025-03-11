@@ -12,8 +12,6 @@ safer-ffi = "0.1.12"
 [dependencies.rfd]
 git = "https://github.com/PolyMeilex/rfd.git"
 rev = "24842c4"
-default-features = false
-features = ["xdg-portal"]
 
 [[bin]]
 name = "generate-headers"
