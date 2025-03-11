@@ -169,7 +169,7 @@ fun <T> BigTastyBacon(
         ExporterDropdownEntry(exporterState, { expanded = false })
     }
 
-    Importer(importPath, importItem, serializer, { expanded = false }, model)
+    Importer(importPath, importItem, serializer, { expanded = false; importPath = null }, model)
     Exporter(exporterState, items, serializer, { expanded = false })
 }
 
