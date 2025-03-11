@@ -69,8 +69,6 @@ tasks {
             "--library", ":$libraryPath$name",
             "--output", jextractOutput.get().asFile.absolutePath,
             "--include-function", "free_c_string",
-            "--include-function", "is_null" +
-                    "",
             "--include-function", "open_file",
             "--include-function", "save_file",
             "--include-typedef", "uint8_t",
@@ -79,6 +77,7 @@ tasks {
             "--include-struct", "Vec_uint8_t",
             "--include-struct", "Filter",
             "--include-struct", "slice_ref_Filter",
+            "--include-struct", "slice_ref_Vec_uint8",
             header,
         )
     }

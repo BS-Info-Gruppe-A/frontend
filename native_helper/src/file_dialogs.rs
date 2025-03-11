@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 #[derive_ReprC]
 #[repr(C)]
-struct Filter {
+struct Filter<'a> {
     name: repr_c::String,
-    spec: repr_c::String,
+    spec: c_slice::Ref<'a, repr_c::String>
 }
 
 #[derive_ReprC]
@@ -16,12 +16,7 @@ struct FileDialogResponse {
     file: Option<repr_c::String>,
 }
 
-type Filters<'a> = c_slice::Ref<'a, Filter>;
-
-#[ffi_export]
-fn fd_is_err(result: Option<repr_c::String>)-> bool {
-    result.is_none()
-}
+type Filters<'a> = c_slice::Ref<'a, Filter<'a>>;
 
 #[ffi_export]
 fn open_file(filters: Filters<'_>) -> repr_c::String {
@@ -35,7 +30,7 @@ fn save_file(filters: Filters<'_>) -> repr_c::String {
 
 fn file_picker(filters: Filters<'_>) -> FileDialog {
     filters.iter().fold(FileDialog::new(), |dialog, filter| {
-        dialog.add_filter(filter.name.clone(), &[filter.spec.clone()])
+        dialog.add_filter(filter.name.clone(), &filter.spec)
     })
 }
 

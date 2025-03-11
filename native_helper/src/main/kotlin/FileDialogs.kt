@@ -3,7 +3,9 @@ package eu.bsinfo.native_helper
 import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
 import eu.bsinfo.native_helper.generated.NativeHelper
+import eu.bsinfo.native_helper.generated.Vec_uint8
 import eu.bsinfo.native_helper.generated.slice_ref_Filter
+import eu.bsinfo.native_helper.generated.slice_ref_Vec_uint8
 import java.lang.foreign.Arena
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.SegmentAllocator
@@ -24,8 +26,18 @@ fun Collection<Filter>.allocate(allocator: SegmentAllocator): MemorySegment =
 
 fun Filter.allocate(allocator: SegmentAllocator, segment: MemorySegment = CFilter.allocate(allocator)): MemorySegment {
     CFilter.name(segment, allocator.allocateCString(name))
-    CFilter.spec(segment, allocator.allocateCString(spec))
+    val spec = slice_ref_Vec_uint8.allocate(allocator).apply {
+        val array = Vec_uint8.allocateArray(spec.size.toLong(), allocator)
+        slice_ref_Vec_uint8.len(this, spec.size.toLong())
+        slice_ref_Vec_uint8.ptr(this, array)
 
+        spec.forEachIndexed { index, value ->
+            val entry = array.asSlice(index.toLong() * Vec_uint8.sizeof(), Vec_uint8.sizeof())
+
+            allocator.allocateCString(value, entry)
+        }
+    }
+    CFilter.spec(segment, spec)
     return segment
 }
 

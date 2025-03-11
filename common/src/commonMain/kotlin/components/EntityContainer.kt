@@ -23,10 +23,14 @@ import androidx.compose.ui.unit.dp
 import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
 import eu.bsinfo.isMobile
-import eu.bsinfo.util.*
+import eu.bsinfo.util.FileHandle
+import eu.bsinfo.util.chooseFile
+import eu.bsinfo.util.extension
+import eu.bsinfo.util.formats
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.serializer
 
@@ -160,9 +164,8 @@ fun <T> BigTastyBacon(
         DropdownMenuItem({ Text("Import") }, {
             scope.launch {
                 try {
-                    importPath = chooseFile(*formats.keys.map {
-                        Filter(it, it)
-                    }.toTypedArray())
+                    val filter = Filter("Datenformate", formats.keys)
+                    importPath = chooseFile(filter)
                 } catch (_: FileDialogCancelException) {
                     expanded = false
                 }
@@ -187,6 +190,7 @@ fun <T> DataProcessor(
 ) {
     var processing by remember(path) { mutableStateOf(true) }
     var invalidFileExtension by remember(path) { mutableStateOf(false) }
+    var serializerError by remember(path) { mutableStateOf<Boolean>(false) }
 
     if (path != null) {
         LaunchedEffect(path) {
@@ -195,7 +199,11 @@ fun <T> DataProcessor(
             if (format == null) {
                 invalidFileExtension = true
             } else {
-                processor(format, path, serializer)
+                try {
+                    processor(format, path, serializer)
+                } catch (e: SerializationException) {
+                    serializerError = true
+                }
             }
             onDone()
             processing = false
@@ -223,6 +231,8 @@ fun <T> DataProcessor(
             text = {
                 if (invalidFileExtension) {
                     Text("Bitte verwende json, csv oder xml", textAlign = TextAlign.Center)
+                } else if (serializerError) {
+                    Text("Die Datei konnte nicht geladen werden und ist möglicherweise ungültig!")
                 } else if (processing) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

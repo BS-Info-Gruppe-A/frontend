@@ -9,7 +9,12 @@ internal fun SegmentAllocator.allocateCString(
     value: String,
     segment: MemorySegment = Vec_uint8.allocate(this)
 ): MemorySegment = segment.apply {
-    allocateStringSegment(value, segment)
+    val ptr = allocateFrom(value)
+    val len = value.length.toLong()
+
+    Vec_uint8.len(segment, len)
+    Vec_uint8.cap(segment, len)
+    Vec_uint8.ptr(segment, ptr)
 }
 
 internal fun MemorySegment.readString(): String {
@@ -22,14 +27,4 @@ internal fun MemorySegment.readString(): String {
     } finally {
         NativeHelper.free_c_string(this)
     }
-}
-
-private fun SegmentAllocator.allocateStringSegment(
-    value: String, segment: MemorySegment
-) {
-    val ptr = allocateFrom(value)
-    val len = value.length.toLong()
-
-    Vec_uint8.len(segment, len)
-    Vec_uint8.ptr(segment, ptr)
 }
