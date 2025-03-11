@@ -65,7 +65,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation(projects.nativeHelper)
-                implementation(libs.ktor.client.okhttp)
+                 implementation(libs.ktor.client.java)
                 implementation(libs.kotlinx.coroutines.swing)
             }
         }
@@ -75,39 +75,5 @@ kotlin {
                 implementation(libs.kotlinx.browser)
             }
         }
-    }
-}
-
-fun KotlinDependencyHandler.lwjglDependency(dependency: ProviderConvertible<MinimalExternalModuleDependency>) =
-    lwjglDependency(dependency.asProvider())
-
-fun KotlinDependencyHandler.lwjglDependency(dependency: Provider<MinimalExternalModuleDependency>) {
-    implementation(dependency)
-    when (val host = HostManager.host) {
-        KonanTarget.MACOS_ARM64 -> implementation(project.dependencies.variantOf(dependency) {
-            classifier("natives-macos-arm64")
-        })
-
-        KonanTarget.MACOS_X64 -> implementation(project.dependencies.variantOf(dependency) {
-            classifier("natives-macos")
-        })
-
-        KonanTarget.MINGW_X64 -> implementation(project.dependencies.variantOf(dependency) {
-            classifier("natives-windows")
-        })
-
-        KonanTarget.LINUX_ARM64 -> implementation(project.dependencies.variantOf(dependency) {
-            classifier("natives-linux-arm")
-        })
-
-        KonanTarget.LINUX_ARM64 -> implementation(project.dependencies.variantOf(dependency) {
-            classifier("natives-linux-arm64")
-        })
-
-        KonanTarget.LINUX_X64 -> implementation(project.dependencies.variantOf(dependency) {
-            classifier("natives-linux")
-        })
-
-        else -> error("Unsupported Target: $host")
     }
 }

@@ -11,35 +11,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kotlinx.serialization.Serializable
 
-enum class MainScreen {
-    Customers, Readings
+sealed interface MainScreen {
+    @Serializable
+    data object Customers : MainScreen
+    @Serializable
+    data object Readings : MainScreen
 }
 
 @Composable
 fun BSInfoApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = MainScreen.valueOf(backStackEntry?.destination?.route ?: MainScreen.Customers.name)
 
     AppTheme {
         Scaffold(bottomBar = {
             BottomAppBar {
                 NavigationBar {
                     NavigationBarItem(
-                        currentScreen == MainScreen.Customers,
-                        { navController.navigate(MainScreen.Customers.name) },
+                        backStackEntry?.destination?.hasRoute<MainScreen.Customers>() == true,
+                        { navController.navigate(MainScreen.Customers) },
                         {
                             Icon(Icons.Default.Person, contentDescription = null)
                         },
                         label = { Text("Customers") })
                     NavigationBarItem(
-                        currentScreen == MainScreen.Readings,
-                        { navController.navigate(MainScreen.Readings.name) },
+                        backStackEntry?.destination?.hasRoute<MainScreen.Readings>() == true,
+                        { navController.navigate(MainScreen.Readings) },
                         {
                             Icon(Icons.Default.GasMeter, contentDescription = null)
                         },
@@ -47,13 +51,13 @@ fun BSInfoApp() {
                 }
             }
         }) {padding ->
-            NavHost(navController, startDestination = MainScreen.Customers.name,
+            NavHost(navController, startDestination = MainScreen.Customers,
                 modifier = Modifier.padding(padding).clickable(remember { MutableInteractionSource() }, indication = null) {}) {
-                composable(route = MainScreen.Customers.name) {
+                composable<MainScreen.Customers> {
                     CustomersScreen()
                 }
 
-                composable(route = MainScreen.Readings.name) {
+                composable<MainScreen.Readings> {
                     ReadingsScreen()
                 }
             }
