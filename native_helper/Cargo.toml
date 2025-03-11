@@ -12,7 +12,7 @@ safer-ffi = "0.1.12"
 [dependencies.rfd]
 version = "0.15.2"
 default-features = false
-features = ["gtk-sys"]
+features = ["xdg-portal"]
 
 [[bin]]
 name = "generate-headers"
