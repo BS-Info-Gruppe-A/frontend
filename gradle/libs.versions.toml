@@ -5,7 +5,6 @@ compose = "1.8.0-alpha04"
 ktor = "3.1.1"
 jansi = "2.4.1"
 logback = "1.5.17"
-lwjgl = "3.3.6"
 
 [libraries]
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.2" }
@@ -33,9 +32,6 @@ kotlinx-serialization-csv = { group = "app.softwork", name = "kotlinx-serializat
 
 jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
-
-lwjgl = { group = "org.lwjgl", name = "lwjgl", version.ref = "lwjgl" }
-lwjgl-nfd = { group = "org.lwjgl", name = "lwjgl-nfd", version.ref = "lwjgl" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

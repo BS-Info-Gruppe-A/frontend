@@ -33,5 +33,5 @@ suspend fun openLoadDialog(vararg filters: Filter): Path = withContext(Dispatche
 }
 
 suspend fun openSaveDialog(vararg filters: Filter): Path = withContext(Dispatchers.Loom) {
-        Path(saveFile(*filters))
-    }
+    Path(saveFile(*filters))
+}
