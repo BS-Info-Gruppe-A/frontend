@@ -8,8 +8,8 @@ import kotlinx.datetime.atStartOfDayIn
 private val options = DateFormatterOptions()
 
 actual fun formatLocalDate(date: LocalDate): String {
-    val date = date.atStartOfDayIn(TimeZone.currentSystemDefault())
-    val jsDate = Date(date.toEpochMilliseconds().toDouble())
+    val dateTime = date.atStartOfDayIn(TimeZone.currentSystemDefault())
+    val jsDate = Date(dateTime.toEpochMilliseconds().toDouble())
     val formatter = DateTimeFormat(window.navigator.language.toJsString(), options)
 
     return formatter.format(jsDate).toString()
