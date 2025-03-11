@@ -25,6 +25,8 @@ jobs:
         with:
           cache-workspaces: native_helper
       - uses: gradle/actions/setup-gradle@v4
+      - run: apt install libwayland-dev -y
+        if: startsWith(matrix.os, 'ubuntu')
       - run: ./gradlew desktop:packageReleaseDistributionForCurrentOS
       - name: Upload distributions
         uses: actions/upload-artifact@v4
