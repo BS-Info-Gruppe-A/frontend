@@ -201,7 +201,7 @@ fun <T> DataProcessor(
             } else {
                 try {
                     processor(format, path, serializer)
-                } catch (e: SerializationException) {
+                } catch (_: SerializationException) {
                     serializerError = true
                 }
             }
