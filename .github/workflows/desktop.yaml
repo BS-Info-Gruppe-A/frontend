@@ -25,7 +25,7 @@ jobs:
         with:
           cache-workspaces: native_helper
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew client:packageReleaseDistributionForCurrentOS
+      - run: ./gradlew desktop:packageReleaseDistributionForCurrentOS
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         id: upload-artifact
