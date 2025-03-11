@@ -7,8 +7,12 @@ edition = "2024"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-rfd = "0.15.2"
 safer-ffi = "0.1.12"
+
+[dependencies.rfd]
+version = "0.15.2"
+default-features = false
+features = ["gtk-sys"]
 
 [[bin]]
 name = "generate-headers"
