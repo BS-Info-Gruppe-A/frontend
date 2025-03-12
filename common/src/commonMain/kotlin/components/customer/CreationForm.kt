@@ -23,14 +23,19 @@ import kotlin.uuid.Uuid
 
 @Composable
 fun CustomerCreationForm(model: CustomersScreenModel) {
+    val state by model.uiState.collectAsState()
+    var firstName by remember(state) { mutableStateOf("") }
+    var firstNameIsError by remember(state) { mutableStateOf(false) }
+    var lastName by remember(state) { mutableStateOf("") }
+    var lastNameIsError by remember(state) { mutableStateOf(false) }
+    var date by remember(state) { mutableStateOf(Clock.System.now()) }
+    var dateIsError by remember(state) { mutableStateOf(false) }
+    var gender by remember(state) { mutableStateOf<Customer.Gender?>(null) }
+    var genderIsError by remember(state) { mutableStateOf(false) }
+
     val apiClient = LocalClient.current
 
-    if (model.uiState.value.creationFormVisible) {
-        var firstName by remember { mutableStateOf("") }
-        var lastName by remember { mutableStateOf("") }
-        var date by remember { mutableStateOf(Clock.System.now()) }
-        var gender by remember { mutableStateOf<Customer.Gender?>(null) }
-
+    if (state.creationFormVisible) {
         CreationForm(model, "Kunde erstellen", {
             apiClient.createCustomer(Customer(
                 Uuid.random(),
@@ -41,16 +46,18 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
             ))
             model.refresh()
             model.closeCreationForm()
-        }) {
+        }) { loading ->
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Labeled("Vorname") {
-                    OutlinedTextField(firstName, { firstName = it }, placeholder = { Text("Max") })
+                    OutlinedTextField(firstName, { firstName = it },
+                        placeholder = { Text("Max") }, enabled = !loading)
                 }
                 Labeled("Nachname") {
-                    OutlinedTextField(lastName, { lastName = it }, placeholder = { Text("Musterfrau") })
+                    OutlinedTextField(lastName, { lastName = it },
+                        placeholder = { Text("Musterfrau") }, enabled = !loading)
                 }
             }
 
@@ -59,10 +66,11 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Labeled("Geschlecht") {
-                    EnumInputField(gender, { gender = it }, placeholder = { Text("Bus") })
+                    EnumInputField(gender, { gender = it },
+                        placeholder = { Text("Bus") }, enabled = !loading)
                 }
                 Labeled("Geburtsdatum") {
-                    DatePickerInputField(date, { date = it })
+                    DatePickerInputField(date, { date = it },  enabled = !loading)
                 }
             }
         }

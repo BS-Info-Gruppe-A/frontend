@@ -24,7 +24,7 @@ fun CreationForm(
     title: String,
     onInsert: suspend CoroutineScope.() -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.(Boolean) -> Unit
 ) = BoxWithConstraints {
     val state by model.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -48,7 +48,7 @@ fun CreationForm(
                 verticalArrangement = Arrangement.spacedBy(15.dp),
                 modifier = Modifier.padding(vertical = 20.dp),
                 content = {
-                    content()
+                    content(loading)
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 15.dp, horizontal = 25.dp),
                         horizontalArrangement = Arrangement.End
@@ -75,11 +75,13 @@ fun CreationForm(
 }
 
 @Composable
-fun DatePickerInputField(date: Instant, setValue: (Instant) -> Unit) {
+fun DatePickerInputField(date: Instant, setValue: (Instant) -> Unit, enabled: Boolean = true) {
     var visible by remember { mutableStateOf(false) }
     val localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
-    OutlinedTextField(formatLocalDate(localDate), {}, readOnly = true, trailingIcon = {
+    OutlinedTextField(formatLocalDate(localDate), {}, readOnly = true,
+        enabled = enabled,
+        trailingIcon = {
         IconButton({ visible = true }) {
             Icon(Icons.Default.CalendarMonth, "Select date")
         }
@@ -108,7 +110,8 @@ fun DatePickerInputField(date: Instant, setValue: (Instant) -> Unit) {
 inline fun <reified E> EnumInputField(
     current: E?,
     crossinline setValue: (E) -> Unit,
-    noinline placeholder: @Composable (() -> Unit)? = null
+    noinline placeholder: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
 ) where E : Enum<E>, E : ReadableEnum {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = false }) {
@@ -116,6 +119,7 @@ inline fun <reified E> EnumInputField(
             current?.humanName ?: "",
             { },
             placeholder = placeholder,
+            enabled = enabled,
             readOnly = true,
             trailingIcon = {
                 IconButton({
