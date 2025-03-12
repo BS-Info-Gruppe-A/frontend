@@ -56,13 +56,14 @@ kotlin {
                 api(compose.ui)
                 api(compose.materialIconsExtended)
                 api(compose.material3)
+                implementation(compose.components.resources)
             }
         }
 
         jvmMain {
             dependencies {
                 implementation(projects.nativeHelper)
-                 implementation(libs.ktor.client.java)
+                implementation(libs.ktor.client.java)
                 implementation(libs.kotlinx.coroutines.swing)
             }
         }
