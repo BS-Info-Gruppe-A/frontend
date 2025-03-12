@@ -22,6 +22,7 @@ import kotlinx.datetime.toLocalDateTime
 fun CreationForm(
     model: EntityViewModel,
     title: String,
+    validate: () -> Boolean,
     onInsert: suspend CoroutineScope.() -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.(Boolean) -> Unit
@@ -56,7 +57,9 @@ fun CreationForm(
                         Button({
                             loading = true
                             scope.launch {
-                                onInsert()
+                                if(validate()) {
+                                    onInsert()
+                                }
                                 loading = false
                             }
                         }) {
@@ -75,13 +78,20 @@ fun CreationForm(
 }
 
 @Composable
-fun DatePickerInputField(date: Instant, setValue: (Instant) -> Unit, enabled: Boolean = true) {
+fun DatePickerInputField(date: Instant,
+                         setValue: (Instant) -> Unit,
+                         supportingText: @Composable (() -> Unit)? = null,
+                         isError: Boolean = false,
+                         enabled: Boolean = true
+) {
     var visible by remember { mutableStateOf(false) }
     val localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     OutlinedTextField(formatLocalDate(localDate), {}, readOnly = true,
         enabled = enabled,
         singleLine = true,
+        isError = isError,
+        supportingText = supportingText,
         trailingIcon = {
         IconButton({ visible = true }) {
             Icon(Icons.Default.CalendarMonth, "Select date")
@@ -113,6 +123,7 @@ inline fun <reified E> EnumInputField(
     crossinline setValue: (E) -> Unit,
     noinline placeholder: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
+    isError: Boolean = false,
 ) where E : Enum<E>, E : ReadableEnum {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = false }) {
@@ -122,6 +133,7 @@ inline fun <reified E> EnumInputField(
             placeholder = placeholder,
             enabled = enabled,
             readOnly = true,
+            isError = isError,
             singleLine = true,
             trailingIcon = {
                 IconButton({

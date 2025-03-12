@@ -36,30 +36,48 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
     val apiClient = LocalClient.current
 
     if (state.creationFormVisible) {
-        CreationForm(model, "Kunde erstellen", {
-            apiClient.createCustomer(Customer(
-                Uuid.random(),
-                firstName,
-                lastName,
-                date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
-                gender!!
-            ))
-            model.refresh()
-            model.closeCreationForm()
-        }) { loading ->
+        CreationForm(
+            model, "Kunde erstellen",
+            onInsert = {
+                apiClient.createCustomer(
+                    Customer(
+                        Uuid.random(),
+                        firstName,
+                        lastName,
+                        date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+                        gender!!
+                    )
+                )
+                model.refresh()
+                model.closeCreationForm()
+            },
+            validate = {
+                firstNameIsError = firstName.isBlank()
+                lastNameIsError = lastName.isBlank()
+                genderIsError = gender == null
+                dateIsError = date > Clock.System.now()
+                !firstNameIsError && !lastNameIsError && !genderIsError && !dateIsError
+            }
+        ) { loading ->
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Labeled("Vorname") {
-                    OutlinedTextField(firstName, { firstName = it },
+                    OutlinedTextField(
+                        firstName, { firstNameIsError = false; firstName = it },
                         singleLine = true,
-                        placeholder = { Text("Max") }, enabled = !loading)
+                        isError = firstNameIsError,
+                        placeholder = { Text("Max") }, enabled = !loading
+                    )
                 }
                 Labeled("Nachname") {
-                    OutlinedTextField(lastName, { lastName = it },
+                    OutlinedTextField(
+                        lastName, { lastNameIsError = false; lastName = it },
                         singleLine = true,
-                        placeholder = { Text("Musterfrau") }, enabled = !loading)
+                        isError = lastNameIsError,
+                        placeholder = { Text("Musterfrau") }, enabled = !loading
+                    )
                 }
             }
 
@@ -68,11 +86,17 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Labeled("Geschlecht") {
-                    EnumInputField(gender, { gender = it },
-                        placeholder = { Text("Bus") }, enabled = !loading)
+                    EnumInputField(
+                        gender, { genderIsError = false; gender = it },
+                        isError = genderIsError,
+                        placeholder = { Text("Bus") }, enabled = !loading
+                    )
                 }
                 Labeled("Geburtsdatum") {
-                    DatePickerInputField(date, { date = it },  enabled = !loading)
+                    DatePickerInputField(date, { dateIsError = false; date = it },
+                        isError = dateIsError,
+                        supportingText = { Text("Muss in der Vergangenheit liegen") },
+                        enabled = !loading)
                 }
             }
         }
