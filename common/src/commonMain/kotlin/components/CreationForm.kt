@@ -81,6 +81,7 @@ fun DatePickerInputField(date: Instant, setValue: (Instant) -> Unit, enabled: Bo
 
     OutlinedTextField(formatLocalDate(localDate), {}, readOnly = true,
         enabled = enabled,
+        singleLine = true,
         trailingIcon = {
         IconButton({ visible = true }) {
             Icon(Icons.Default.CalendarMonth, "Select date")
@@ -121,6 +122,7 @@ inline fun <reified E> EnumInputField(
             placeholder = placeholder,
             enabled = enabled,
             readOnly = true,
+            singleLine = true,
             trailingIcon = {
                 IconButton({
                     expanded = true

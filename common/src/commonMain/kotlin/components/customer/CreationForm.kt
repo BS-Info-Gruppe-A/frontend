@@ -53,10 +53,12 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
             ) {
                 Labeled("Vorname") {
                     OutlinedTextField(firstName, { firstName = it },
+                        singleLine = true,
                         placeholder = { Text("Max") }, enabled = !loading)
                 }
                 Labeled("Nachname") {
                     OutlinedTextField(lastName, { lastName = it },
+                        singleLine = true,
                         placeholder = { Text("Musterfrau") }, enabled = !loading)
                 }
             }
