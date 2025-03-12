@@ -14,6 +14,7 @@ import eu.bsinfo.data.ReadableEnum
 import eu.bsinfo.util.formatLocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -99,7 +100,12 @@ fun DatePickerInputField(date: Instant,
     })
 
     if (visible) {
-        val state = rememberDatePickerState()
+        val selector = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
+            }
+        }
+        val state = rememberDatePickerState(selectableDates = selector)
         DatePickerDialog(
             { visible = false },
             confirmButton = {
