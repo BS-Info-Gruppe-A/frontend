@@ -51,6 +51,7 @@ data class ReadingsScreenState(
     val selectedEndDate: LocalDate? = null,
     val selectedKind: Reading.Kind? = null,
     val selectedCustomer: Customer? = null,
+    override val creationFormVisible: Boolean = false,
     override val query: String = "",
     val readings: List<Reading> = emptyList(),
 ) : EntityViewState {
@@ -80,6 +81,13 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     fun closeKindPickerSheet() = _uiState.tryEmit(uiState.value.copy(isKindSheetVisible = false))
     fun openCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = true))
     fun closeCustomerSheet() = _uiState.tryEmit(uiState.value.copy(isCustomerSheetVisible = false))
+    override fun openCreationForm() {
+        _uiState.tryEmit(uiState.value.copy(creationFormVisible = true))
+    }
+
+    override fun closeCreationForm() {
+        _uiState.tryEmit(uiState.value.copy(creationFormVisible = false))
+    }
 
     override fun setSearchQuery(text: String) {
         _uiState.tryEmit(_uiState.value.copy(query = text, readings = _uiState.value.readings.search(text)))

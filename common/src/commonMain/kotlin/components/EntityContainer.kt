@@ -36,6 +36,7 @@ import kotlinx.serialization.serializer
 
 interface EntityViewState {
     val query: String
+    val creationFormVisible: Boolean
 }
 
 interface EntityViewModel {
@@ -43,6 +44,9 @@ interface EntityViewModel {
     suspend fun refresh()
 
     fun setSearchQuery(text: String)
+
+    fun openCreationForm()
+    fun closeCreationForm()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +80,7 @@ inline fun <reified T> EntityContainer(
                 val isExpanded by interactionSource.collectIsHoveredAsState()
 
                 ExtendedFloatingActionButton(
-                    onClick = {},
+                    onClick = { viewModel.openCreationForm() },
                     expanded = isExpanded,
                     text = addButtonText,
                     icon = addButtonIcon,
@@ -219,7 +223,7 @@ fun <T> DataProcessor(
                     done()
                 }
             },
-            dismissButton = { if(!invalidFileExtension) additionalButtons?.invoke() },
+            dismissButton = { if (!invalidFileExtension) additionalButtons?.invoke() },
             confirmButton = {
                 if (invalidFileExtension || !processing) {
                     Button(onClose) {

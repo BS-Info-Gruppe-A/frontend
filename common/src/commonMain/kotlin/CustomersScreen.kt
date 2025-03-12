@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,6 +21,7 @@ import eu.bsinfo.components.DeleteDialog
 import eu.bsinfo.components.EntityContainer
 import eu.bsinfo.components.EntityViewModel
 import eu.bsinfo.components.EntityViewState
+import eu.bsinfo.components.customer.CustomerCreationForm
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
@@ -36,6 +38,7 @@ data class CustomersScreenState(
     val isLoading: Boolean = true,
     val customers: List<Customer> = emptyList(),
     override val query: String = "",
+    override val creationFormVisible: Boolean = false
 ) : EntityViewState
 
 class CustomersScreenModel(private val client: Client) : ViewModel(), EntityViewModel {
@@ -53,6 +56,14 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
     suspend fun deleteCustomer(customerId: Uuid) = withContext(Dispatchers.IO) {
         client.deleteCustomer(customerId)
         _uiState.emit(uiState.value.copy(customers = uiState.value.customers.filter { it.id != customerId }))
+    }
+
+    override fun openCreationForm() {
+        _uiState.tryEmit(uiState.value.copy(creationFormVisible = true))
+    }
+
+    override fun closeCreationForm() {
+        _uiState.tryEmit(uiState.value.copy(creationFormVisible = false))
     }
 }
 
@@ -75,6 +86,7 @@ fun CustomersScreen(
         addButtonText = { Text("Kunden erstellen") },
         searchPlaceholder = { Text("Suche nach Kundenname") }
     ) {
+        CustomerCreationForm(model)
         LazyVerticalGrid(
             GridCells.Adaptive(260.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),
@@ -106,13 +118,21 @@ private fun CustomerCard(customer: Customer, query: String, model: CustomersScre
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        customer.matchingName(query),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 7.dp)
-                            .fillMaxWidth(fraction = .9f)
-                    )
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+                        tooltip = { RichTooltip { Text(customer.fullName) } },
+                        state = rememberTooltipState()
+                    ) {
+                        Text(
+                            customer.matchingName(query),
+                            style = MaterialTheme.typography.headlineSmall,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp, vertical = 7.dp)
+                                .fillMaxWidth(fraction = .9f)
+                        )
+                    }
                     Spacer(Modifier.weight(1f))
                     CustomerDropDown(customer, model)
                 }

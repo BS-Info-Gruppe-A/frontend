@@ -13,8 +13,8 @@ data class Customer(
 ) {
     val fullName get() = "$firstName $lastName"
 
-    enum class Gender(val humanName: String) {
-        M("Männlich"), D("Divers"), F("Weiblich"), U("Unbekannt")
+    enum class Gender(override val humanName: String): ReadableEnum {
+        M("Männlich"), D("Divers"), W("Weiblich"), U("Unbekannt")
     }
 }
 
