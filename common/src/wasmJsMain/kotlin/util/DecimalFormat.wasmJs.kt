@@ -8,8 +8,11 @@ private val regex = Regex("\\d")
 private val thousandSeparator = baseFormat.format(11111.0).toString().replace(regex, "")
 private val decimalSeparator = baseFormat.format(1.1).toString().replace(regex, "")
 
-actual fun formatDecimal(value: Double): String = format.format(value).toString()
-actual fun parseDecimal(value: String): Double? = parseLocaleNumber(value.toJsString())
+actual fun formatDecimal(context: PlatformContext, value: Double): String =
+    format.format(value).toString()
+
+actual fun parseDecimal(context: PlatformContext, value: String): Double? =
+    parseLocaleNumber(value.toJsString())
 
 // JS is garbage: https://stackoverflow.com/a/29273131
 private fun parseLocaleNumber(input: JsString): Double? {

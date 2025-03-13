@@ -25,6 +25,7 @@ import eu.bsinfo.components.customer.CustomerCreationForm
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.LocalPlatformContext
 import eu.bsinfo.util.formatLocalDate
 import eu.bsinfo.util.matchingName
 import eu.bsinfo.util.search
@@ -106,6 +107,7 @@ fun CustomersScreen(
 
 @Composable
 private fun CustomerCard(customer: Customer, query: String, model: CustomersScreenModel) {
+    val context = LocalPlatformContext.current
     ElevatedCard(
         modifier = Modifier
             .width(260.dp)
@@ -149,7 +151,7 @@ private fun CustomerCard(customer: Customer, query: String, model: CustomersScre
                     )
                     CustomerDetail(
                         icon = Icons.Filled.Cake,
-                        text = formatLocalDate(customer.birthDate)
+                        text = formatLocalDate(context, customer.birthDate)
                     )
                 }
             }

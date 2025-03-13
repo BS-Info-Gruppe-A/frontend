@@ -7,4 +7,5 @@ import java.time.format.FormatStyle
 
 private val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 
-actual fun formatLocalDate(date: LocalDate): String = formatter.format(date.toJavaLocalDate())
+actual fun formatLocalDate(context: PlatformContext, date: LocalDate): String =
+    formatter.format(date.toJavaLocalDate())

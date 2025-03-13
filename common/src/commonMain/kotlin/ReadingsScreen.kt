@@ -29,6 +29,8 @@ import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.LocalPlatformContext
+import eu.bsinfo.util.PlatformContext
 import eu.bsinfo.util.format
 import eu.bsinfo.util.formatLocalDate
 import eu.bsinfo.util.matching
@@ -57,20 +59,19 @@ data class ReadingsScreenState(
     override val query: String = "",
     val readings: List<Reading> = emptyList(),
 ) : EntityViewState {
-    val dateRangeFormatted: String?
-        get() {
-            val startDate = selectedStartDate
-            val endDate = selectedEndDate
-            if (startDate == null) return null
+    fun formatDate(context: PlatformContext): String? {
+        val startDate = selectedStartDate
+        val endDate = selectedEndDate
+        if (startDate == null) return null
 
-            return buildString {
-                append(formatLocalDate(startDate))
-                if (endDate != null) {
-                    append(" - ")
-                    append(formatLocalDate(endDate))
-                }
+        return buildString {
+            append(formatLocalDate(context, startDate))
+            if (endDate != null) {
+                append(" - ")
+                append(formatLocalDate(context, endDate))
             }
         }
+    }
 }
 
 class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
@@ -92,7 +93,12 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     }
 
     override fun setSearchQuery(text: String) {
-        _uiState.tryEmit(_uiState.value.copy(query = text, readings = _uiState.value.readings.search(text)))
+        _uiState.tryEmit(
+            _uiState.value.copy(
+                query = text,
+                readings = _uiState.value.readings.search(text)
+            )
+        )
     }
 
     suspend fun setDateRange(from: Long?, to: Long?) {
@@ -135,7 +141,9 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
         _uiState.emit(
             state.copy(
                 readings = client.getReadings(
-                    from = state.selectedStartDate, to = state.selectedEndDate, kind = state.selectedKind,
+                    from = state.selectedStartDate,
+                    to = state.selectedEndDate,
+                    kind = state.selectedKind,
                     customerId = state.selectedCustomer?.id
                 ).readings, loading = false
             )
@@ -148,7 +156,8 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     }
 
     private fun Long.toLocalDate(): LocalDate {
-        val dateTime = Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
+        val dateTime =
+            Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
         return LocalDate(dateTime.year, dateTime.month, dateTime.dayOfMonth)
     }
 }
@@ -198,15 +207,17 @@ fun ReadingsScreen(
 private fun Filters(model: ReadingsScreenModel, modifier: Modifier = Modifier) {
     val uiState by model.uiState.collectAsState()
     val scope = rememberCoroutineScope()
+    val context = LocalPlatformContext.current
     Row(
         horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally),
-        modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp).horizontalScroll(rememberScrollState())
+        modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp)
+            .horizontalScroll(rememberScrollState())
     ) {
         Filter(
             onClick = { model.openDateSheet() },
             onDismiss = { scope.launch { model.setDateRange(null, null) } },
             label = {
-                val range = uiState.dateRangeFormatted ?: "Datum"
+                val range = uiState.formatDate(context) ?: "Datum"
                 Text(range)
             },
             enabled = uiState.selectedStartDate != null,
@@ -259,6 +270,7 @@ private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenMo
             .width(260.dp).wrapContentHeight()
             .padding(vertical = 7.dp)
     ) {
+        val context = LocalPlatformContext.current
         Box(
             Modifier
                 .fillMaxWidth()
@@ -292,13 +304,13 @@ private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenMo
                         )
                         ReadingDetail(
                             icon = Icons.Filled.GasMeter,
-                            text = reading.meterCount.format()
+                            text = reading.meterCount.format(context)
                         )
                     }
                     Row {
                         ReadingDetail(
                             icon = Icons.Filled.CalendarToday,
-                            text = formatLocalDate(reading.date)
+                            text = formatLocalDate(context, reading.date)
                         )
                         ReadingDetail(
                             icon = Icons.Filled.ElectricMeter,
@@ -333,7 +345,12 @@ private fun ReadingDropDown(customer: Reading, model: ReadingsScreenModel) {
             { isDeleting = false },
             { model.deleteReading(customer.id) },
             title = { Text("Ablesung löschen?", color = MaterialTheme.colorScheme.onError) },
-            text = { Text("Möchten Sie die Ablesung wirklich löschen?", color = MaterialTheme.colorScheme.onError) },
+            text = {
+                Text(
+                    "Möchten Sie die Ablesung wirklich löschen?",
+                    color = MaterialTheme.colorScheme.onError
+                )
+            },
         )
     }
 

@@ -24,9 +24,9 @@ import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
 import eu.bsinfo.isMobile
 import eu.bsinfo.util.FileHandle
-import eu.bsinfo.util.chooseFile
 import eu.bsinfo.util.extension
 import eu.bsinfo.util.formats
+import eu.bsinfo.util.rememberFilePicker
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
@@ -84,6 +84,7 @@ inline fun <reified T> EntityContainer(
                     modifier = Modifier.hoverable(interactionSource)
                 )
             },
+            contentWindowInsets = WindowInsets(0.dp),
             modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp)
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
@@ -105,11 +106,20 @@ inline fun <reified T> EntityContainer(
                                     placeholder = searchPlaceholder,
                                     onExpandedChange = {},
                                     onSearch = { },
-                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.Search,
+                                            contentDescription = "Search"
+                                        )
+                                    },
                                     trailingIcon = {
                                         if (!isMobile) { // On mobile you can use pull to refresh
                                             if (refreshing) {
-                                                CircularProgressIndicator(Modifier.size(ButtonDefaults.IconSize))
+                                                CircularProgressIndicator(
+                                                    Modifier.size(
+                                                        ButtonDefaults.IconSize
+                                                    )
+                                                )
                                             } else {
                                                 IconButton(onClick = {
                                                     scope.launch {
@@ -118,7 +128,10 @@ inline fun <reified T> EntityContainer(
                                                         refreshing = false
                                                     }
                                                 }) {
-                                                    Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                                                    Icon(
+                                                        Icons.Default.Refresh,
+                                                        contentDescription = "Refresh"
+                                                    )
                                                 }
                                             }
                                         }
@@ -155,6 +168,7 @@ fun <T> BigTastyBacon(
 ) {
     val scope = rememberCoroutineScope()
     val exporterState = rememberExporterState()
+    val filePicker = rememberFilePicker()
 
     var expanded by remember { mutableStateOf(false) }
     var importPath by remember { mutableStateOf<FileHandle?>(null) }
@@ -172,7 +186,7 @@ fun <T> BigTastyBacon(
             scope.launch {
                 try {
                     val filter = Filter("Datenformate", formats.keys)
-                    importPath = chooseFile(filter)
+                    importPath = filePicker.chooseFile(filter)
                 } catch (_: FileDialogCancelException) {
                     expanded = false
                 }
@@ -243,7 +257,10 @@ fun <T> DataProcessor(
                 } else if (processing) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+                        verticalArrangement = Arrangement.spacedBy(
+                            10.dp,
+                            Alignment.CenterVertically
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         CircularProgressIndicator()

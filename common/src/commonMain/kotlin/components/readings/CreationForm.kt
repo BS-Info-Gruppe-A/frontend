@@ -22,6 +22,7 @@ import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.LocalPlatformContext
 import eu.bsinfo.util.PastDates
 import eu.bsinfo.util.format
 import eu.bsinfo.util.formatDecimal
@@ -111,16 +112,17 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
             horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
             modifier = Modifier.fillMaxWidth()
         ) {
+            val context = LocalPlatformContext.current
             Labeled("Zählerstand") {
                 OutlinedTextField(
-                    value?.format() ?: "",
+                    value?.format(context) ?: "",
                     {
                         value =
-                            if (it.isBlank()) null else parseDecimal(it) ?: return@OutlinedTextField; valueIsError =
+                            if (it.isBlank()) null else parseDecimal(context, it) ?: return@OutlinedTextField; valueIsError =
                         false
                     },
                     isError = valueIsError,
-                    placeholder = { Text(formatDecimal(420.69)) },
+                    placeholder = { Text(formatDecimal(context, 420.69)) },
                     modifier = Modifier.fillMaxWidth(.2f),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
                 )

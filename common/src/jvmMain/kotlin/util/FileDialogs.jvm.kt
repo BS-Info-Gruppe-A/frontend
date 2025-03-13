@@ -1,5 +1,6 @@
 package eu.bsinfo.util
 
+import androidx.compose.runtime.Composable
 import eu.bsinfo.Loom
 import eu.bsinfo.file_dialog.Filter
 import eu.bsinfo.native_helper.openFile
@@ -23,10 +24,13 @@ actual class FileHandle(val delegate: Path) {
     override fun toString(): String = delegate.toString()
 }
 
-actual suspend fun chooseFile(vararg filters: Filter): FileHandle? {
-    val path = openLoadDialog(*filters)
-    return FileHandle(path)
+private object JvmFilePicker : FilePicker {
+    override suspend fun chooseFile(vararg filters: Filter): FileHandle? =
+        FileHandle(openLoadDialog(*filters))
 }
+
+@Composable
+actual fun rememberFilePicker(): FilePicker = JvmFilePicker
 
 suspend fun openLoadDialog(vararg filters: Filter): Path = withContext(Dispatchers.Loom) {
     Path(openFile(*filters))

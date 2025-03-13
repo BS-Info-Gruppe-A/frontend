@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    `multiplatform-module`
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose)
@@ -15,8 +15,9 @@ kotlin {
             group("fileChooser") {
                 withJvm()
             }
-            group("skia") {
+            group("nativeDarkMode") {
                 withWasmJs()
+                withAndroidTarget()
             }
         }
     }
@@ -71,6 +72,11 @@ kotlin {
         wasmJsMain {
             dependencies {
                 implementation(libs.kotlinx.browser)
+            }
+        }
+        androidMain {
+            dependencies {
+                implementation(libs.ktor.client.okhttp)
             }
         }
     }

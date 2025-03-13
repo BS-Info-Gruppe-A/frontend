@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.bsinfo.data.ReadableEnum
+import eu.bsinfo.util.LocalPlatformContext
 import eu.bsinfo.util.formatLocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -90,9 +91,10 @@ fun DatePickerInputField(
 ) {
     var visible by remember { mutableStateOf(false) }
     val localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val context = LocalPlatformContext.current
 
     OutlinedTextField(
-        formatLocalDate(localDate), {}, readOnly = true,
+        formatLocalDate(context, localDate), {}, readOnly = true,
         enabled = enabled,
         singleLine = true,
         isError = isError,

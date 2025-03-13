@@ -7,7 +7,7 @@ private val format =
 
 actual fun formatDecimal(context: PlatformContext, value: Double): String = format.format(value)
 actual fun parseDecimal(context: PlatformContext, value: String): Double? = try {
-    format.parse(value).toDouble()
+    format.parse(value)?.toDouble()
 } catch (_: NumberFormatException) {
     null
 }

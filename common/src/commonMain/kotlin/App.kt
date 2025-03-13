@@ -2,7 +2,12 @@ package eu.bsinfo
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GasMeter
 import androidx.compose.material.icons.filled.Person
@@ -21,6 +26,7 @@ import kotlinx.serialization.Serializable
 sealed interface MainScreen {
     @Serializable
     data object Customers : MainScreen
+
     @Serializable
     data object Readings : MainScreen
 }
@@ -31,28 +37,33 @@ fun BSInfoApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
 
     AppTheme {
-        Scaffold(bottomBar = {
-            BottomAppBar {
-                NavigationBar {
-                    NavigationBarItem(
-                        backStackEntry?.destination?.hasRoute<MainScreen.Customers>() == true,
-                        { navController.navigate(MainScreen.Customers) },
-                        {
-                            Icon(Icons.Default.Person, contentDescription = null)
-                        },
-                        label = { Text("Customers") })
-                    NavigationBarItem(
-                        backStackEntry?.destination?.hasRoute<MainScreen.Readings>() == true,
-                        { navController.navigate(MainScreen.Readings) },
-                        {
-                            Icon(Icons.Default.GasMeter, contentDescription = null)
-                        },
-                        label = { Text("Readings") })
+        Scaffold(
+            bottomBar = {
+                BottomAppBar {
+                    NavigationBar {
+                        NavigationBarItem(
+                            backStackEntry?.destination?.hasRoute<MainScreen.Customers>() == true,
+                            { navController.navigate(MainScreen.Customers) },
+                            {
+                                Icon(Icons.Default.Person, contentDescription = null)
+                            },
+                            label = { Text("Customers") })
+                        NavigationBarItem(
+                            backStackEntry?.destination?.hasRoute<MainScreen.Readings>() == true,
+                            { navController.navigate(MainScreen.Readings) },
+                            {
+                                Icon(Icons.Default.GasMeter, contentDescription = null)
+                            },
+                            label = { Text("Readings") })
+                    }
                 }
-            }
-        }) {padding ->
-            NavHost(navController, startDestination = MainScreen.Customers,
-                modifier = Modifier.padding(padding).clickable(remember { MutableInteractionSource() }, indication = null) {}) {
+            },
+            modifier = Modifier.fillMaxSize(),
+        ) { padding ->
+            NavHost(
+                navController, startDestination = MainScreen.Customers,
+                modifier = Modifier.padding(padding)
+                    .clickable(remember { MutableInteractionSource() }, indication = null) {}) {
                 composable<MainScreen.Customers> {
                     CustomersScreen()
                 }

@@ -2,7 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    org.jetbrains.kotlin.jvm
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose)
 }

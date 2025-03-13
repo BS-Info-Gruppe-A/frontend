@@ -1,16 +1,8 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
-    kotlin("multiplatform")
+    `multiplatform-module`
 }
 
 kotlin {
-    jvm()
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-    }
-
     sourceSets {
         commonMain {
             dependencies {

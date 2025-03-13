@@ -1,5 +1,6 @@
 package eu.bsinfo.util
 
+import androidx.compose.runtime.Composable
 import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
 import kotlinx.browser.document
@@ -23,23 +24,29 @@ actual class FileHandle(private val delegate: File) {
     }
 }
 
-actual suspend fun chooseFile(vararg filters: Filter): FileHandle? = suspendCoroutine { cont ->
-    val input = document.createElement("input") {
-        require(this is HTMLInputElement)
-        type = "file"
-        accept = ".json, .csv, .xml"
-    } as HTMLInputElement
+private object WasmFilePicker : FilePicker {
+    override suspend fun chooseFile(vararg filters: Filter): FileHandle? =
+        suspendCoroutine { cont ->
+            val input = document.createElement("input") {
+                require(this is HTMLInputElement)
+                type = "file"
+                accept = ".json, .csv, .xml"
+            } as HTMLInputElement
 
-    input.oncancel = {
-        input.remove()
-        cont.resumeWithException(FileDialogCancelException())
-    }
-    input.onchange = {
-        val file = input.files!![0]!!
+            input.oncancel = {
+                input.remove()
+                cont.resumeWithException(FileDialogCancelException())
+            }
+            input.onchange = {
+                val file = input.files!![0]!!
 
-        input.remove()
-        cont.resume(FileHandle(file))
-    }
+                input.remove()
+                cont.resume(FileHandle(file))
+            }
 
-    input.click()
+            input.click()
+        }
 }
+
+@Composable
+actual fun rememberFilePicker(): FilePicker = WasmFilePicker
