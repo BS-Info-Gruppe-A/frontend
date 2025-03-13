@@ -95,7 +95,6 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
                 Labeled("Geburtsdatum") {
                     DatePickerInputField(date, { dateIsError = false; date = it },
                         isError = dateIsError,
-                        supportingText = { Text("Muss in der Vergangenheit liegen") },
                         enabled = !loading)
                 }
             }
