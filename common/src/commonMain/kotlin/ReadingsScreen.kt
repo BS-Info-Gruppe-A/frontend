@@ -29,6 +29,7 @@ import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.format
 import eu.bsinfo.util.formatLocalDate
 import eu.bsinfo.util.matching
 import eu.bsinfo.util.search
@@ -287,7 +288,7 @@ private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenMo
                         )
                         ReadingDetail(
                             icon = Icons.Filled.GasMeter,
-                            text = reading.meterCount.toString()
+                            text = reading.meterCount.format()
                         )
                     }
                     Row {

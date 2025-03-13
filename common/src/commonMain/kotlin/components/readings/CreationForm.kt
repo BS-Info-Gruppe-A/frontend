@@ -20,6 +20,8 @@ import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.PastDates
+import eu.bsinfo.util.format
+import eu.bsinfo.util.formatDecimal
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -106,14 +108,14 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
         ) {
             Labeled("Zählerstand") {
                 OutlinedTextField(
-                    value?.toString() ?: "",
+                    value?.format() ?: "",
                     {
                         value =
                             if (it.isBlank()) null else it.toDoubleOrNull() ?: return@OutlinedTextField; valueIsError =
                         false
                     },
                     isError = valueIsError,
-                    placeholder = { Text("420.69") },
+                    placeholder = { Text(formatDecimal(420.69)) },
                     modifier = Modifier.fillMaxWidth(.2f),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
                 )
