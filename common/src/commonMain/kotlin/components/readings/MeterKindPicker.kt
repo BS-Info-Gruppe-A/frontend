@@ -19,7 +19,7 @@ fun KindPicker(state: ReadingsScreenState, model: ReadingsScreenModel) {
             Reading.Kind.entries.forEach {
                 SelectableRow({scope.launch { model.setKind(it) }}) {
                     Icon(it.icon, null)
-                    Text(it.readableName, style = MaterialTheme.typography.bodyLarge)
+                    Text(it.humanName, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

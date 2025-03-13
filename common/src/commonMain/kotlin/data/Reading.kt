@@ -16,7 +16,7 @@ data class Readings(val readings: List<Reading>)
 @Serializable
 data class Reading(
     val id: Uuid,
-    val comment: String,
+    val comment: String?,
     val customer: Customer?,
     @SerialName("dateOfReading")
     val date: SerializableDate,
@@ -26,7 +26,7 @@ data class Reading(
     val meterId: String,
     val substitute: Boolean
 ) {
-    enum class Kind(val readableName: String) {
+    enum class Kind(override val humanName: String) : ReadableEnum {
         HEIZUNG("Heizung"),
         WASSER("Wasser"),
         STROM("Strom"),

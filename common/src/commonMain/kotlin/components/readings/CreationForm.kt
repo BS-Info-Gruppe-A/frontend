@@ -1,0 +1,201 @@
+package eu.bsinfo.components.readings
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import eu.bsinfo.ReadingsScreenModel
+import eu.bsinfo.components.CreationForm
+import eu.bsinfo.components.DatePickerInputField
+import eu.bsinfo.components.EnumInputField
+import eu.bsinfo.components.Labeled
+import eu.bsinfo.data.Customer
+import eu.bsinfo.data.Reading
+import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.PastDates
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.uuid.Uuid
+
+@Composable
+fun ReadingCreationForm(model: ReadingsScreenModel) {
+    val state by model.uiState.collectAsState()
+    var comment by remember(state) { mutableStateOf("") }
+    var customer by remember(state) { mutableStateOf<Customer?>(null) }
+    var customerIsError by remember(state) { mutableStateOf(false) }
+    var date by remember(state) { mutableStateOf<Instant>(Clock.System.now()) }
+    var dateIsError by remember(state) { mutableStateOf(false) }
+    var kind by remember(state) { mutableStateOf<Reading.Kind?>(null) }
+    var kindIsError by remember(state) { mutableStateOf(false) }
+    var value by remember(state) { mutableStateOf<Double?>(null) }
+    var valueIsError by remember(state) { mutableStateOf(false) }
+    var meterId by remember(state) { mutableStateOf<Int?>(null) }
+    var meterIdIsError by remember(state) { mutableStateOf(false) }
+    var substitute by remember(state) { mutableStateOf(false) }
+    val client = LocalClient.current
+
+    CreationForm(model, "Ablesung erstellen", {
+        customerIsError = customer == null
+        dateIsError = date > Clock.System.now()
+        kindIsError = kind == null
+        valueIsError = value == null
+        meterIdIsError = meterId == null
+
+        !customerIsError && !dateIsError && !kindIsError && !valueIsError && !meterIdIsError
+    }, {
+        client.createReading(
+            Reading(
+                Uuid.random(),
+                comment.ifBlank { null },
+                customer,
+                date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+                kind!!,
+                value!!,
+                meterId.toString(),
+                substitute
+            )
+        )
+
+        model.refresh()
+        model.closeCreationForm()
+    }) { loading ->
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Labeled("Zählertyp") {
+                EnumInputField<Reading.Kind>(
+                    kind, { kind = it; kindIsError = false },
+                    placeholder = { Text("Zählertyp") },
+                    enabled = !loading,
+                    isError = kindIsError,
+                    modifier = Modifier.fillMaxWidth(.3f)
+                )
+            }
+            Labeled("Zählernummer") {
+                OutlinedTextField(
+                    meterId?.toString() ?: "",
+                    {
+                        meterIdIsError = false
+                        meterId = if (it.isBlank()) null else it.toIntOrNull() ?: return@OutlinedTextField
+                    },
+                    isError = meterIdIsError,
+                    placeholder = { Text("12345") },
+                    modifier = Modifier.fillMaxWidth(.3f),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                )
+            }
+
+            Labeled("Ersatzzähler", alignment = Alignment.CenterHorizontally) {
+                Switch(substitute, { substitute = it })
+            }
+        }
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Labeled("Zählerstand") {
+                OutlinedTextField(
+                    value?.toString() ?: "",
+                    {
+                        value =
+                            if (it.isBlank()) null else it.toDoubleOrNull() ?: return@OutlinedTextField; valueIsError =
+                        false
+                    },
+                    isError = valueIsError,
+                    placeholder = { Text("420.69") },
+                    modifier = Modifier.fillMaxWidth(.2f),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                )
+            }
+            Labeled("Ablesedatum") {
+                DatePickerInputField(
+                    date,
+                    { date = it; dateIsError = false },
+                    selectableDates = PastDates,
+                    modifier = Modifier.fillMaxWidth(.3f),
+                    isError = dateIsError,
+                )
+            }
+
+            Labeled("Kunde") {
+                CustomerInputField(
+                    customer, { customer = it; customerIsError = false }, isError = customerIsError,
+                    modifier = Modifier.fillMaxWidth(.3f)
+                )
+            }
+        }
+
+        Row {
+            Labeled("Kommentar", modifier = Modifier.padding(horizontal = 25.dp)) {
+                OutlinedTextField(
+                    comment, { comment = it },
+                    placeholder = { Text("Der Kunde hat den Zähler pink angemalt") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CustomerInputField(
+    current: Customer?, setCustomer: (Customer) -> Unit,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        current?.fullName ?: "",
+        { },
+        placeholder = { Text("Tom Mot") },
+        enabled = enabled,
+        readOnly = true,
+        isError = isError,
+        singleLine = true,
+        trailingIcon = {
+            IconButton({
+                expanded = true
+            }) { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+        },
+        modifier = modifier
+    )
+
+    if (expanded) {
+        DatePickerDialog(
+            { expanded = false },
+            confirmButton = { TextButton({ expanded = false }) { Text("Abbrechen") } },
+        ) {
+            var search by remember { mutableStateOf("") }
+            val client = LocalClient.current
+            val model = viewModel { CustomerPickerViewModel(client) }
+
+            CustomerPicker(
+                LocalClient.current,
+                search,
+                { setCustomer(it); expanded = false },
+                searchBar = {
+                    SearchBarDefaults.InputField(
+                        search, { search = it; model.search(it) },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+                        onSearch = {}, expanded = false, onExpandedChange = {}, modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                model = model,
+                modifier = Modifier.fillMaxHeight(.9f)
+            )
+        }
+    }
+}

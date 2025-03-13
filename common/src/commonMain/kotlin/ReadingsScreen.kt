@@ -21,8 +21,9 @@ import eu.bsinfo.components.DeleteDialog
 import eu.bsinfo.components.EntityContainer
 import eu.bsinfo.components.EntityViewModel
 import eu.bsinfo.components.EntityViewState
-import eu.bsinfo.components.readings.CustomerPicker
+import eu.bsinfo.components.readings.CustomerPickerSheet
 import eu.bsinfo.components.readings.KindPicker
+import eu.bsinfo.components.readings.ReadingCreationForm
 import eu.bsinfo.components.readings.ReadingDatePicker
 import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
@@ -180,9 +181,10 @@ fun ReadingsScreen(
         }
     }
 
+    ReadingCreationForm(model)
     ReadingDatePicker(state, model)
     KindPicker(state, model)
-    CustomerPicker(client, state.isCustomerSheetVisible, { model.closeCustomerSheet() }, {
+    CustomerPickerSheet(client, state.isCustomerSheetVisible, { model.closeCustomerSheet() }, {
         scope.launch { model.setCustomer(it) }
     })
 }
@@ -208,7 +210,7 @@ private fun Filters(model: ReadingsScreenModel, modifier: Modifier = Modifier) {
         Filter(
             onClick = { model.openKindPickerSheet() },
             onDismiss = { scope.launch { model.setKind(null) } },
-            label = { Text(uiState.selectedKind?.readableName ?: "Ablesungsart") },
+            label = { Text(uiState.selectedKind?.humanName ?: "Ablesungsart") },
             enabled = uiState.selectedKind != null,
             leadingIcon = { Icon(Icons.Default.ElectricMeter, "Kind") }
         )
@@ -295,7 +297,7 @@ private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenMo
                         )
                         ReadingDetail(
                             icon = Icons.Filled.ElectricMeter,
-                            text = reading.kind.readableName
+                            text = reading.kind.humanName
                         )
                     }
                 }

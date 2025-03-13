@@ -16,6 +16,7 @@ import eu.bsinfo.components.EnumInputField
 import eu.bsinfo.components.Labeled
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.LocalClient
+import eu.bsinfo.util.PastDates
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -35,68 +36,69 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
 
     val apiClient = LocalClient.current
 
-    if (state.creationFormVisible) {
-        CreationForm(
-            model, "Kunde erstellen",
-            onInsert = {
-                apiClient.createCustomer(
-                    Customer(
-                        Uuid.random(),
-                        firstName,
-                        lastName,
-                        date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
-                        gender!!
-                    )
+    CreationForm(
+        model, "Kunde erstellen",
+        onInsert = {
+            apiClient.createCustomer(
+                Customer(
+                    Uuid.random(),
+                    firstName,
+                    lastName,
+                    date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+                    gender!!
                 )
-                model.refresh()
-                model.closeCreationForm()
-            },
-            validate = {
-                firstNameIsError = firstName.isBlank()
-                lastNameIsError = lastName.isBlank()
-                genderIsError = gender == null
-                dateIsError = date > Clock.System.now()
-                !firstNameIsError && !lastNameIsError && !genderIsError && !dateIsError
+            )
+            model.refresh()
+            model.closeCreationForm()
+        },
+        validate = {
+            firstNameIsError = firstName.isBlank()
+            lastNameIsError = lastName.isBlank()
+            genderIsError = gender == null
+            dateIsError = date > Clock.System.now()
+            !firstNameIsError && !lastNameIsError && !genderIsError && !dateIsError
+        }
+    ) { loading ->
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Labeled("Vorname") {
+                OutlinedTextField(
+                    firstName, { firstNameIsError = false; firstName = it },
+                    singleLine = true,
+                    isError = firstNameIsError,
+                    placeholder = { Text("Max") }, enabled = !loading
+                )
             }
-        ) { loading ->
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Labeled("Vorname") {
-                    OutlinedTextField(
-                        firstName, { firstNameIsError = false; firstName = it },
-                        singleLine = true,
-                        isError = firstNameIsError,
-                        placeholder = { Text("Max") }, enabled = !loading
-                    )
-                }
-                Labeled("Nachname") {
-                    OutlinedTextField(
-                        lastName, { lastNameIsError = false; lastName = it },
-                        singleLine = true,
-                        isError = lastNameIsError,
-                        placeholder = { Text("Musterfrau") }, enabled = !loading
-                    )
-                }
+            Labeled("Nachname") {
+                OutlinedTextField(
+                    lastName, { lastNameIsError = false; lastName = it },
+                    singleLine = true,
+                    isError = lastNameIsError,
+                    placeholder = { Text("Musterfrau") }, enabled = !loading
+                )
             }
+        }
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Labeled("Geschlecht") {
-                    EnumInputField(
-                        gender, { genderIsError = false; gender = it },
-                        isError = genderIsError,
-                        placeholder = { Text("Bus") }, enabled = !loading
-                    )
-                }
-                Labeled("Geburtsdatum") {
-                    DatePickerInputField(date, { dateIsError = false; date = it },
-                        isError = dateIsError,
-                        enabled = !loading)
-                }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Labeled("Geschlecht") {
+                EnumInputField(
+                    gender, { genderIsError = false; gender = it },
+                    isError = genderIsError,
+                    placeholder = { Text("Bus") }, enabled = !loading
+                )
+            }
+            Labeled("Geburtsdatum") {
+                DatePickerInputField(
+                    date, { dateIsError = false; date = it },
+                    isError = dateIsError,
+                    selectableDates = PastDates,
+                    enabled = !loading
+                )
             }
         }
     }

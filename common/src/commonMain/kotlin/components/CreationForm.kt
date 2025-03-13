@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -14,7 +15,6 @@ import eu.bsinfo.data.ReadableEnum
 import eu.bsinfo.util.formatLocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -58,7 +58,7 @@ fun CreationForm(
                         Button({
                             loading = true
                             scope.launch {
-                                if(validate()) {
+                                if (validate()) {
                                     onInsert()
                                 }
                                 loading = false
@@ -79,33 +79,33 @@ fun CreationForm(
 }
 
 @Composable
-fun DatePickerInputField(date: Instant,
-                         setValue: (Instant) -> Unit,
-                         supportingText: @Composable (() -> Unit)? = null,
-                         isError: Boolean = false,
-                         enabled: Boolean = true
+fun DatePickerInputField(
+    date: Instant,
+    setValue: (Instant) -> Unit,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    selectableDates: SelectableDates = DatePickerDefaults.AllDates,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     var visible by remember { mutableStateOf(false) }
     val localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
-    OutlinedTextField(formatLocalDate(localDate), {}, readOnly = true,
+    OutlinedTextField(
+        formatLocalDate(localDate), {}, readOnly = true,
         enabled = enabled,
         singleLine = true,
         isError = isError,
+        modifier = modifier,
         supportingText = supportingText,
         trailingIcon = {
-        IconButton({ visible = true }) {
-            Icon(Icons.Default.CalendarMonth, "Select date")
-        }
-    })
+            IconButton({ visible = true }) {
+                Icon(Icons.Default.CalendarMonth, "Select date")
+            }
+        })
 
     if (visible) {
-        val selector = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
-            }
-        }
-        val state = rememberDatePickerState(selectableDates = selector)
+        val state = rememberDatePickerState(selectableDates = selectableDates)
         DatePickerDialog(
             { visible = false },
             confirmButton = {
@@ -130,6 +130,7 @@ inline fun <reified E> EnumInputField(
     noinline placeholder: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
     isError: Boolean = false,
+    modifier: Modifier = Modifier,
 ) where E : Enum<E>, E : ReadableEnum {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = false }) {
@@ -146,7 +147,7 @@ inline fun <reified E> EnumInputField(
                     expanded = true
                 }) { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
             },
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier = modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
         )
 
         ExposedDropdownMenu(expanded, onDismissRequest = { expanded = false }) {
@@ -164,8 +165,8 @@ inline fun <reified E> EnumInputField(
 }
 
 @Composable
-fun Labeled(label: String, content: @Composable ColumnScope.() -> Unit) = Column {
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+fun Labeled(label: String, alignment: Alignment.Horizontal = Alignment.Start, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) = Column {
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically), horizontalAlignment = alignment, modifier = modifier) {
         Text(label, style = MaterialTheme.typography.headlineSmall)
         content()
     }
