@@ -37,7 +37,7 @@ class CustomerCreationFormState {
     var genderIsError by mutableStateOf(false)
     var enabled by mutableStateOf(true)
 
-    val isValid = true
+    val isValid by derivedStateOf { firstName.isNotBlank() && lastName.isNotBlank() && gender != null }
 
     fun toCustomer() = Customer(
         Uuid.random(),
