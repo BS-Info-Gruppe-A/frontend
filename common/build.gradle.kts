@@ -62,7 +62,7 @@ kotlin {
 
         jvmMain {
             dependencies {
-                implementation(projects.nativeHelper)
+                api(projects.nativeHelper)
                 implementation(libs.ktor.client.java)
                 implementation(libs.kotlinx.coroutines.swing)
             }
