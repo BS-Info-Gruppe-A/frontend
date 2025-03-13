@@ -33,7 +33,7 @@ tasks {
     val generateHeaders by registering(Exec::class) {
         dependsOn(compileRust)
         inputs.dir("src")
-        outputs.dir("target")
+        outputs.file("target/native_helper.h")
 
         commandLine("cargo", "run", "--features", "headers", "--bin", "generate-headers")
     }
