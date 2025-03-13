@@ -131,7 +131,6 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     }
 
     override suspend fun refresh() = withContext(Dispatchers.IO) {
-        setLoading(true)
         val state = _uiState.value
         _uiState.emit(
             state.copy(

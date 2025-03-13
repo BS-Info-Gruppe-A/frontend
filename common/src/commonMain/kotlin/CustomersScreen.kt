@@ -50,7 +50,6 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
     }
 
     override suspend fun refresh() = withContext(Dispatchers.IO) {
-        setLoading(true)
         _uiState.emit(uiState.value.copy(customers = client.getCustomers().customers, loading = false))
     }
 

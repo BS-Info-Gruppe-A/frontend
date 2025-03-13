@@ -13,7 +13,7 @@ internal fun SegmentAllocator.allocateCString(
     val len = value.length.toLong()
 
     Vec_uint8.len(segment, len)
-    Vec_uint8.cap(segment, len)
+    Vec_uint8.cap(segment, ptr.byteSize())
     Vec_uint8.ptr(segment, ptr)
 }
 
