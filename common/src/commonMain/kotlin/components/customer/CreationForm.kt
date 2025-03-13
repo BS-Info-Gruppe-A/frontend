@@ -1,6 +1,7 @@
 package eu.bsinfo.components.customer
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
@@ -20,21 +21,99 @@ import eu.bsinfo.util.PastDates
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.compareTo
 import kotlin.uuid.Uuid
 
 @Composable
-fun CustomerCreationForm(model: CustomersScreenModel) {
-    val state by model.uiState.collectAsState()
-    var firstName by remember(state) { mutableStateOf("") }
-    var firstNameIsError by remember(state) { mutableStateOf(false) }
-    var lastName by remember(state) { mutableStateOf("") }
-    var lastNameIsError by remember(state) { mutableStateOf(false) }
-    var date by remember(state) { mutableStateOf(Clock.System.now()) }
-    var dateIsError by remember(state) { mutableStateOf(false) }
-    var gender by remember(state) { mutableStateOf<Customer.Gender?>(null) }
-    var genderIsError by remember(state) { mutableStateOf(false) }
+fun rememberCustomerCreationFormState(key: Any? = null) = remember(key) { CustomerCreationFormState() }
 
+class CustomerCreationFormState {
+    var firstName by mutableStateOf("")
+    var firstNameIsError by mutableStateOf(false)
+    var lastName by mutableStateOf("")
+    var lastNameIsError by mutableStateOf(false)
+    var date by mutableStateOf(Clock.System.now())
+    var dateIsError by mutableStateOf(false)
+    var gender by mutableStateOf<Customer.Gender?>(null)
+    var genderIsError by mutableStateOf(false)
+    var enabled by mutableStateOf(true)
+
+    @get:Composable
+    val isValid by derivedStateOf {
+        firstName.isNotEmpty() && lastName.isNotEmpty() && gender != null
+    }
+
+    fun toCustomer() = Customer(
+        Uuid.random(),
+        firstName,
+        lastName,
+        date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+        gender!!
+    )
+
+    fun validate(): Boolean {
+        firstNameIsError = firstName.isBlank()
+        lastNameIsError = lastName.isBlank()
+        genderIsError = gender == null
+        dateIsError = date > Clock.System.now()
+        return !firstNameIsError && !lastNameIsError && !genderIsError && !dateIsError
+    }
+}
+
+@Composable
+fun CustomerCreationInput(
+    state: CustomerCreationFormState = rememberCustomerCreationFormState(),
+    disabled: Boolean = false,
+    modifier: Modifier = Modifier
+) = Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Labeled("Vorname") {
+            OutlinedTextField(
+                state.firstName, { state.firstNameIsError = false; state.firstName = it },
+                singleLine = true,
+                isError = state.firstNameIsError,
+                placeholder = { Text("Max") }, enabled = !disabled && state.enabled
+            )
+        }
+        Labeled("Nachname") {
+            OutlinedTextField(
+                state.lastName, { state.lastNameIsError = false; state.lastName = it },
+                singleLine = true,
+                isError = state.lastNameIsError,
+                placeholder = { Text("Musterfrau") }, enabled = !disabled && state.enabled
+            )
+        }
+    }
+
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Labeled("Geschlecht") {
+            EnumInputField(
+                state.gender, { state.genderIsError = false; state.gender = it },
+                isError = state.genderIsError,
+                placeholder = { Text("Bus") }, enabled = !disabled && state.enabled
+            )
+        }
+        Labeled("Geburtsdatum") {
+            DatePickerInputField(
+                state.date, { state.dateIsError = false; state.date = it },
+                isError = state.dateIsError,
+                selectableDates = PastDates,
+                enabled = !disabled && state.enabled
+            )
+        }
+    }
+}
+
+@Composable
+fun CustomerCreationForm(model: CustomersScreenModel) {
     val apiClient = LocalClient.current
+    val state = rememberCustomerCreationFormState(model.uiState.value)
 
     CreationForm(
         model, "Kunde erstellen",
@@ -42,64 +121,15 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
             apiClient.createCustomer(
                 Customer(
                     Uuid.random(),
-                    firstName,
-                    lastName,
-                    date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
-                    gender!!
+                    state.firstName,
+                    state.lastName,
+                    state.date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+                    state.gender!!
                 )
             )
             model.refresh()
             model.closeCreationForm()
         },
-        validate = {
-            firstNameIsError = firstName.isBlank()
-            lastNameIsError = lastName.isBlank()
-            genderIsError = gender == null
-            dateIsError = date > Clock.System.now()
-            !firstNameIsError && !lastNameIsError && !genderIsError && !dateIsError
-        }
-    ) { loading ->
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Labeled("Vorname") {
-                OutlinedTextField(
-                    firstName, { firstNameIsError = false; firstName = it },
-                    singleLine = true,
-                    isError = firstNameIsError,
-                    placeholder = { Text("Max") }, enabled = !loading
-                )
-            }
-            Labeled("Nachname") {
-                OutlinedTextField(
-                    lastName, { lastNameIsError = false; lastName = it },
-                    singleLine = true,
-                    isError = lastNameIsError,
-                    placeholder = { Text("Musterfrau") }, enabled = !loading
-                )
-            }
-        }
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Labeled("Geschlecht") {
-                EnumInputField(
-                    gender, { genderIsError = false; gender = it },
-                    isError = genderIsError,
-                    placeholder = { Text("Bus") }, enabled = !loading
-                )
-            }
-            Labeled("Geburtsdatum") {
-                DatePickerInputField(
-                    date, { dateIsError = false; date = it },
-                    isError = dateIsError,
-                    selectableDates = PastDates,
-                    enabled = !loading
-                )
-            }
-        }
-    }
+        validate = state::validate,
+    ) { loading -> CustomerCreationInput(state, loading) }
 }

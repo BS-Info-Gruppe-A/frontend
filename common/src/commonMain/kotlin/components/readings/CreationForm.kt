@@ -10,18 +10,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.ReadingsScreenModel
 import eu.bsinfo.components.CreationForm
 import eu.bsinfo.components.DatePickerInputField
 import eu.bsinfo.components.EnumInputField
 import eu.bsinfo.components.Labeled
+import eu.bsinfo.components.customer.rememberCustomerCreationFormState
 import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
+import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.PastDates
 import eu.bsinfo.util.format
 import eu.bsinfo.util.formatDecimal
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -154,11 +158,16 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
 @Composable
 private fun CustomerInputField(
     current: Customer?, setCustomer: (Customer) -> Unit,
+    client: Client = LocalClient.current,
+    model: CustomerPickerViewModel = viewModel { CustomerPickerViewModel(client) },
     enabled: Boolean = true,
     isError: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+
     var expanded by remember { mutableStateOf(false) }
+    val state by model.uiState.collectAsState()
+
     OutlinedTextField(
         current?.fullName ?: "",
         { },
@@ -168,26 +177,52 @@ private fun CustomerInputField(
         isError = isError,
         singleLine = true,
         trailingIcon = {
-            IconButton({
-                expanded = true
-            }) { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+            IconButton({ expanded = true }) { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
         },
         modifier = modifier
     )
 
     if (expanded) {
+        val creatorState = rememberCustomerCreationFormState(state)
+        val scope = rememberCoroutineScope()
+        var loading by remember { mutableStateOf(false) }
+
         DatePickerDialog(
             { expanded = false },
-            confirmButton = { TextButton({ expanded = false }) { Text("Abbrechen") } },
+            dismissButton = {
+                if (state.customerCreationVisible) {
+                    TextButton({ model.closeCustomerCreator() }) { Text("Zurück") }
+                }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            confirmButton = {
+                if (state.customerCreationVisible) {
+                    TextButton({
+                        creatorState.enabled = false
+                        loading = true
+                        scope.launch {
+                            val customer = creatorState.toCustomer()
+                            client.createCustomer(customer)
+                            setCustomer(customer)
+                            expanded = false
+                            loading = false
+                        }
+                    }, enabled = creatorState.isValid) { Text("Weiter") }
+                } else if (!loading) {
+                    TextButton({ expanded = false }) { Text("Abbrechen") }
+                } else {
+                    CircularProgressIndicator()
+                }
+            }
         ) {
             var search by remember { mutableStateOf("") }
-            val client = LocalClient.current
-            val model = viewModel { CustomerPickerViewModel(client) }
 
             CustomerPicker(
                 LocalClient.current,
                 search,
                 { setCustomer(it); expanded = false },
+                hasCreator = true,
+                creationState = creatorState,
                 searchBar = {
                     SearchBarDefaults.InputField(
                         search, { search = it; model.search(it) },
@@ -196,7 +231,6 @@ private fun CustomerInputField(
                     )
                 },
                 model = model,
-                modifier = Modifier.fillMaxHeight(.9f)
             )
         }
     }
