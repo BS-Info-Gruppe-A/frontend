@@ -89,9 +89,7 @@ tasks {
     compileKotlin {
         dependsOn(generateBindingsWithJextract)
     }
-}
 
-tasks {
     withType<KotlinJvmCompile>().configureEach {
         jvmTargetValidationMode.set(JvmTargetValidationMode.IGNORE)
     }
