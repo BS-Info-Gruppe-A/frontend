@@ -51,22 +51,17 @@ tasks {
         }
 
         val libraryPath = if (System.getenv("GITHUB_REF") != null) {
-            "resources"
+            file("resources")
         } else {
-            file("target/release").absolutePath
+            file("target/release")
         }
-        val name = when {
-            HostManager.hostIsMac -> "/libnative_helper.dylib"
-            HostManager.hostIsMingw -> "\\native_helper.dll"
-            HostManager.hostIsLinux -> "/libnativehelper.so"
-            else -> error("Unknown host")
-        }
+        val name = System.mapLibraryName("native_helper")
 
         commandLine(
             command,
             "--header-class-name", "NativeHelper",
             "--target-package", "eu.bsinfo.native_helper.generated",
-            "--library", ":$libraryPath$name",
+            "--library", ":${libraryPath.resolve(name).absolutePath}",
             "--output", jextractOutput.get().asFile.absolutePath,
             "--include-function", "free_c_string",
             "--include-function", "open_file",
