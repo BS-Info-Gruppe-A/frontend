@@ -3,10 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <title>BSInfo App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script type="importmap">
+        {
+          "imports": {
+            "@material/web/": "https://esm.run/@material/web/"
+          }
+        }
+    </script>
+    <script type="module">
+        import '@material/web/all.js';
+        import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+
+        document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+    </script>
     <script type="application/javascript" src="web.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* Default light mode styles */
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5; /* Light background */
+            color: #000; /* Text color for light mode */
+        }
+
+        /* Dark mode overrides */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212; /* Dark background */
+                color: #fff; /* Text color for dark mode */
+            }
+        }
+
+        #loading-container {
+            text-align: center;
+        }
+
+        md-circular-progress {
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+
+        #loading-text {
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+
+        #wasm-error {
+            font-size: 1.5em;
+        }
+
+        a {
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
+<script>
+    function isWasmGCAvailable() {
+        if (typeof WebAssembly === "undefined") {
+            console.log("WASM is not supported, so WASM GC is unavailable.");
+            return false;
+        }
+
+        // https://github.com/GoogleChromeLabs/wasm-feature-detect/blob/main/src/detectors/gc/index.js
+        const bytes = [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0];
+        return WebAssembly.validate(new Uint8Array(bytes))
+    }
+
+    if (!isWasmGCAvailable()) {
+        window.addEventListener("load", function () {
+            document.getElementById("loading-text").hidden = true;
+            document.getElementById("wasm-error").hidden = false;
+        });
+    }
+</script>
+
+<div id="loading-container">
+    <md-circular-progress indeterminate></md-circular-progress>
+    <div id="loading-text">Loading...</div>
+    <div id="wasm-error" hidden="hidden">WASM is not supported by your browser, please check <a
+            href="https://kotlinlang.org/docs/wasm-troubleshooting.html#browser-versions" class="md3-">this</a> for more
+        info
+    </div>
+</div>
+
 <canvas id="ComposeTarget"></canvas>
 </body>
 </html>
