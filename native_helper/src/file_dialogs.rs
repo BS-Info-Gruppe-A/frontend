@@ -9,13 +9,6 @@ struct Filter<'a> {
     spec: c_slice::Ref<'a, repr_c::String>
 }
 
-#[derive_ReprC]
-#[repr(C)]
-struct FileDialogResponse {
-    is_error: bool,
-    file: Option<repr_c::String>,
-}
-
 type Filters<'a> = c_slice::Ref<'a, Filter<'a>>;
 
 #[ffi_export]
