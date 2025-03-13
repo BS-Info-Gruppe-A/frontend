@@ -21,7 +21,6 @@ import eu.bsinfo.util.PastDates
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.compareTo
 import kotlin.uuid.Uuid
 
 @Composable
@@ -38,10 +37,7 @@ class CustomerCreationFormState {
     var genderIsError by mutableStateOf(false)
     var enabled by mutableStateOf(true)
 
-    @get:Composable
-    val isValid by derivedStateOf {
-        firstName.isNotEmpty() && lastName.isNotEmpty() && gender != null
-    }
+    val isValid = true
 
     fun toCustomer() = Customer(
         Uuid.random(),

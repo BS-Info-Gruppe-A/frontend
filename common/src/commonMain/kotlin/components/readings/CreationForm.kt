@@ -25,6 +25,7 @@ import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.PastDates
 import eu.bsinfo.util.format
 import eu.bsinfo.util.formatDecimal
+import eu.bsinfo.util.parseDecimal
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -115,7 +116,7 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
                     value?.format() ?: "",
                     {
                         value =
-                            if (it.isBlank()) null else it.toDoubleOrNull() ?: return@OutlinedTextField; valueIsError =
+                            if (it.isBlank()) null else parseDecimal(it) ?: return@OutlinedTextField; valueIsError =
                         false
                     },
                     isError = valueIsError,
