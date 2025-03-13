@@ -90,52 +90,58 @@ inline fun <reified T> EntityContainer(
             modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp)
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    BigTastyBacon(importItem, items, serializer, viewModel)
+                if (isRefreshing) {
+                    Column {
+                        LoadingSpinner()
+                    }
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BigTastyBacon(importItem, items, serializer, viewModel)
 
-                    DockedSearchBar(
-                        inputField = {
-                            var refreshing by remember { mutableStateOf(false) }
+                        DockedSearchBar(
+                            inputField = {
+                                var refreshing by remember { mutableStateOf(false) }
 
-                            SearchBarDefaults.InputField(
-                                state.query, viewModel::setSearchQuery,
-                                expanded = false,
-                                placeholder = searchPlaceholder,
-                                onExpandedChange = {},
-                                onSearch = { },
-                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                                trailingIcon = {
-                                    if (!isMobile) { // On mobile you can use pull to refresh
-                                        if (refreshing) {
-                                            CircularProgressIndicator(Modifier.size(ButtonDefaults.IconSize))
-                                        } else {
-                                            IconButton(onClick = {
-                                                scope.launch {
-                                                    refreshing = true
-                                                    viewModel.refresh()
-                                                    refreshing = false
+                                SearchBarDefaults.InputField(
+                                    state.query, viewModel::setSearchQuery,
+                                    expanded = false,
+                                    placeholder = searchPlaceholder,
+                                    onExpandedChange = {},
+                                    onSearch = { },
+                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                                    trailingIcon = {
+                                        if (!isMobile) { // On mobile you can use pull to refresh
+                                            if (refreshing) {
+                                                CircularProgressIndicator(Modifier.size(ButtonDefaults.IconSize))
+                                            } else {
+                                                IconButton(onClick = {
+                                                    scope.launch {
+                                                        refreshing = true
+                                                        viewModel.refresh()
+                                                        refreshing = false
+                                                    }
+                                                }) {
+                                                    Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                                                 }
-                                            }) {
-                                                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                                             }
                                         }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            },
+                            false, {}, modifier = Modifier
+                                .padding(horizontal = 10.dp, vertical = 15.dp)
+                                .fillMaxWidth()
+                                .onKeyEvent {
+                                    if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
+                                        focusRequester.clearFocus()
+                                        true
+                                    } else {
+                                        false
                                     }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        },
-                        false, {}, modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 15.dp)
-                            .fillMaxWidth()
-                            .onKeyEvent {
-                                if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
-                                    focusRequester.clearFocus()
-                                    true
-                                } else {
-                                    false
                                 }
-                            }
-                    ) {}
+                        ) {}
+                    }
                 }
                 content()
             }
