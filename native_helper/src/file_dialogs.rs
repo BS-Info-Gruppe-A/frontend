@@ -28,7 +28,6 @@ fn file_picker(filters: Filters<'_>) -> FileDialog {
 }
 
 fn path_to_string(path: Option<PathBuf>) -> repr_c::String {
-    path.map(|path| path.to_str().map(repr_c::String::from))
-        .flatten()
+    path.and_then(|path| path.to_str().map(repr_c::String::from))
         .unwrap_or(repr_c::String::from(""))
 }
