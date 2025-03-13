@@ -35,7 +35,7 @@ import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
 data class CustomersScreenState(
-    val isLoading: Boolean = true,
+    override val loading: Boolean = true,
     val customers: List<Customer> = emptyList(),
     override val query: String = "",
     override val creationFormVisible: Boolean = false
@@ -50,7 +50,12 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
     }
 
     override suspend fun refresh() = withContext(Dispatchers.IO) {
-        _uiState.emit(uiState.value.copy(customers = client.getCustomers().customers, isLoading = false))
+        setLoading(true)
+        _uiState.emit(uiState.value.copy(customers = client.getCustomers().customers, loading = false))
+    }
+
+    override fun setLoading(loading: Boolean) {
+        _uiState.tryEmit(_uiState.value.copy(loading = loading))
     }
 
     suspend fun deleteCustomer(customerId: Uuid) = withContext(Dispatchers.IO) {
@@ -74,7 +79,7 @@ fun CustomersScreen(
 ) {
     val state by model.uiState.collectAsState()
 
-    if (state.isLoading) {
+    if (state.loading) {
         LaunchedEffect(state) { model.refresh() }
     }
 

@@ -45,7 +45,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.uuid.Uuid
 
 data class ReadingsScreenState(
-    val isLoading: Boolean = true,
+    override val loading: Boolean = true,
     val isDatePickerDialogVisible: Boolean = false,
     val isKindSheetVisible: Boolean = false,
     val isCustomerSheetVisible: Boolean = false,
@@ -99,7 +99,7 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
         _uiState.tryEmit(
             uiState.value.copy(
                 selectedStartDate = from?.toLocalDate(), selectedEndDate = to?.toLocalDate(),
-                isDatePickerDialogVisible = false, isLoading = true
+                isDatePickerDialogVisible = false, loading = true
             )
         )
 
@@ -109,7 +109,7 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     suspend fun setKind(kind: Reading.Kind?) {
         _uiState.tryEmit(
             uiState.value.copy(
-                selectedKind = kind, isKindSheetVisible = false, isLoading = true
+                selectedKind = kind, isKindSheetVisible = false, loading = true
             )
         )
 
@@ -119,21 +119,26 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     suspend fun setCustomer(customer: Customer?) {
         _uiState.tryEmit(
             uiState.value.copy(
-                selectedCustomer = customer, isCustomerSheetVisible = false, isLoading = true
+                selectedCustomer = customer, isCustomerSheetVisible = false, loading = true
             )
         )
 
         refresh()
     }
 
+    override fun setLoading(loading: Boolean) {
+        _uiState.tryEmit(_uiState.value.copy(loading = loading))
+    }
+
     override suspend fun refresh() = withContext(Dispatchers.IO) {
+        setLoading(true)
         val state = _uiState.value
         _uiState.emit(
             state.copy(
                 readings = client.getReadings(
                     from = state.selectedStartDate, to = state.selectedEndDate, kind = state.selectedKind,
                     customerId = state.selectedCustomer?.id
-                ).readings, isLoading = false
+                ).readings, loading = false
             )
         )
     }
@@ -157,7 +162,7 @@ fun ReadingsScreen(
     val state by model.uiState.collectAsState()
     val scope = rememberCoroutineScope()
 
-    if (state.isLoading) {
+    if (state.loading) {
         LaunchedEffect(state) { model.refresh() }
     }
 

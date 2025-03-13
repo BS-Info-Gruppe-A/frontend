@@ -37,6 +37,7 @@ import kotlinx.serialization.serializer
 interface EntityViewState {
     val query: String
     val creationFormVisible: Boolean
+    val loading: Boolean
 }
 
 interface EntityViewModel {
@@ -44,6 +45,7 @@ interface EntityViewModel {
     suspend fun refresh()
 
     fun setSearchQuery(text: String)
+    fun setLoading(loading: Boolean)
 
     fun openCreationForm()
     fun closeCreationForm()
@@ -62,17 +64,12 @@ inline fun <reified T> EntityContainer(
     noinline content: @Composable () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
-    var isRefreshing by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val focusRequester = LocalFocusManager.current
 
-    PullToRefreshBox(isRefreshing, {
-        scope.launch {
-            isRefreshing = true
-            viewModel.refresh()
-            isRefreshing = false
-        }
+    PullToRefreshBox(state.loading, {
+        scope.launch { viewModel.refresh() }
     }, modifier = Modifier.fillMaxSize()) {
         Scaffold(
             floatingActionButton = {
@@ -90,7 +87,7 @@ inline fun <reified T> EntityContainer(
             modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp)
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                if (isRefreshing) {
+                if (state.loading) {
                     Column {
                         LoadingSpinner()
                     }
