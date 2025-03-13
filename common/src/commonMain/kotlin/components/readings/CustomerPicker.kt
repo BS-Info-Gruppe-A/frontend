@@ -70,6 +70,7 @@ fun CustomerPicker(
     search: String,
     onSelect: (Customer) -> Unit,
     hasCreator: Boolean = false,
+    pickerHeight: Float = 1f,
     model: CustomerPickerViewModel = viewModel { CustomerPickerViewModel(client) },
     creationState: CustomerCreationFormState = rememberCustomerCreationFormState(),
     searchBar: @Composable () -> Unit,
@@ -98,7 +99,7 @@ fun CustomerPicker(
                     Column(
                         Modifier
                             .sharedBounds(rememberSharedContentState("customer-picker"), this)
-                            .fillMaxHeight(.55f)
+                            .fillMaxHeight(pickerHeight)
                     ) {
                         searchBar()
                         if (currentState.customers == null) {
