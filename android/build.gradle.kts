@@ -1,4 +1,3 @@
-import com.android.kotlin.multiplatform.ide.models.serialization.androidTargetKey
 import eu.bsinfo.build.androidCompileSdk
 import eu.bsinfo.build.androidMinSdk
 import eu.bsinfo.build.javaVersion

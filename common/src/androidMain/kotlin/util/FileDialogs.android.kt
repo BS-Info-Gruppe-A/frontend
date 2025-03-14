@@ -17,10 +17,6 @@ import eu.bsinfo.file_dialog.Filter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.io.buffered
-import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
-import kotlinx.io.writeString
 import java.io.BufferedReader
 
 actual class FileHandle(private val context: Context? = null, private val path: Uri) {
