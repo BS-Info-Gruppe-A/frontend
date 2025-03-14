@@ -35,4 +35,14 @@ android {
         minSdk = androidMinSdk
         targetSdk = androidCompileSdk
     }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "rules.pro"
+            )
+        }
+    }
 }
