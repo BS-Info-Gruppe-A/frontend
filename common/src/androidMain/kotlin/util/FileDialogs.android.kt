@@ -36,7 +36,7 @@ actual class FileHandle(private val context: Context? = null, private val path: 
                     null
                 }
             }
-        } ?: path.lastPathSegment!!
+        } ?: path.lastPathSegment ?: path.host!!
 
     actual suspend fun read(): String = withContext(Dispatchers.IO) {
         requireNotNull(context) { "This is a name only file" }
