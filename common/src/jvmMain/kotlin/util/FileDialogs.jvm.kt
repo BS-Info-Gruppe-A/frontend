@@ -25,7 +25,7 @@ actual class FileHandle(val delegate: Path) {
 }
 
 private object JvmFilePicker : FilePicker {
-    override suspend fun chooseFile(vararg filters: Filter): FileHandle? =
+    override suspend fun chooseFile(vararg filters: Filter): FileHandle =
         FileHandle(openLoadDialog(*filters))
 }
 

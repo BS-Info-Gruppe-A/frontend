@@ -10,10 +10,10 @@ expect class FileHandle {
 }
 
 val FileHandle.extension: String
-    get() = name.substringAfterLast('.', )
+    get() = name.substringAfterLast('.')
 
 interface FilePicker {
-    suspend fun chooseFile(vararg filters: Filter): FileHandle?
+    suspend fun chooseFile(vararg filters: Filter): FileHandle
 }
 
 @Composable

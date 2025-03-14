@@ -25,7 +25,7 @@ actual class FileHandle(private val delegate: File) {
 }
 
 private object WasmFilePicker : FilePicker {
-    override suspend fun chooseFile(vararg filters: Filter): FileHandle? =
+    override suspend fun chooseFile(vararg filters: Filter): FileHandle =
         suspendCoroutine { cont ->
             val input = document.createElement("input") {
                 require(this is HTMLInputElement)

@@ -1,0 +1,16 @@
+PODS:
+  - ios (1.0.0)
+
+DEPENDENCIES:
+  - ios (from `.`)
+
+EXTERNAL SOURCES:
+  ios:
+    :path: "."
+
+SPEC CHECKSUMS:
+  ios: 61406f7f7eef5fbfaeee8e8cf26abfb78fbb9b43
+
+PODFILE CHECKSUM: 21ae80ad314713d57003a58c08c719eff546eb1b
+
+COCOAPODS: 1.16.2

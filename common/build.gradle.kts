@@ -15,9 +15,16 @@ kotlin {
             group("fileChooser") {
                 withJvm()
             }
+            group("noFileChooser") {
+                withWasmJs()
+                withAndroidTarget()
+                withApple()
+                group("apple")
+            }
             group("nativeDarkMode") {
                 withWasmJs()
                 withAndroidTarget()
+                withApple()
             }
         }
     }
@@ -27,7 +34,10 @@ kotlin {
     }
 
     compilerOptions {
-        optIn.addAll("kotlin.uuid.ExperimentalUuidApi", "androidx.compose.material3.ExperimentalMaterial3Api")
+        optIn.addAll(
+            "kotlin.uuid.ExperimentalUuidApi",
+            "androidx.compose.material3.ExperimentalMaterial3Api"
+        )
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
@@ -74,9 +84,16 @@ kotlin {
                 implementation(libs.kotlinx.browser)
             }
         }
+
         androidMain {
             dependencies {
                 implementation(libs.ktor.client.okhttp)
+            }
+        }
+
+        appleMain {
+            dependencies {
+                implementation(libs.ktor.client.darwin)
             }
         }
     }
