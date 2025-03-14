@@ -25,27 +25,26 @@ actual class FileHandle(private val delegate: File) {
 }
 
 private object WasmFilePicker : FilePicker {
-    override suspend fun chooseFile(vararg filters: Filter): FileHandle =
-        suspendCoroutine { cont ->
-            val input = document.createElement("input") {
-                require(this is HTMLInputElement)
-                type = "file"
-                accept = ".json, .csv, .xml"
-            } as HTMLInputElement
+    override suspend fun chooseFile(vararg filters: Filter): FileHandle = suspendCoroutine { cont ->
+        val input = document.createElement("input") {
+            require(this is HTMLInputElement)
+            type = "file"
+            accept = ".json, .csv, .xml"
+        } as HTMLInputElement
 
-            input.oncancel = {
-                input.remove()
-                cont.resumeWithException(FileDialogCancelException())
-            }
-            input.onchange = {
-                val file = input.files!![0]!!
-
-                input.remove()
-                cont.resume(FileHandle(file))
-            }
-
-            input.click()
+        input.oncancel = {
+            input.remove()
+            cont.resumeWithException(FileDialogCancelException())
         }
+        input.onchange = {
+            val file = input.files!![0]!!
+
+            input.remove()
+            cont.resume(FileHandle(file))
+        }
+
+        input.click()
+    }
 }
 
 @Composable
