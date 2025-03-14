@@ -69,7 +69,7 @@ inline fun <reified T> EntityContainer(
     val focusRequester = LocalFocusManager.current
 
     PullToRefreshBox(state.loading, {
-        scope.launch { viewModel.refresh() }
+        scope.launch { viewModel.setLoading(true); viewModel.refresh() }
     }, modifier = Modifier.fillMaxSize()) {
         Scaffold(
             floatingActionButton = {
@@ -88,7 +88,7 @@ inline fun <reified T> EntityContainer(
             modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp)
         ) { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                if (state.loading) {
+                if (state.loading && (!isMobile || items.isEmpty())) {
                     Column {
                         LoadingSpinner()
                     }
