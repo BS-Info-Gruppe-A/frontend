@@ -11,9 +11,7 @@ private val format = NSNumberFormatter().apply {
 actual fun formatDecimal(context: PlatformContext, value: Double): String =
     format.stringFromNumber(NSDecimalNumber(double = value))!!
 
-actual fun parseDecimal(context: PlatformContext, value: String): Double? = try {
+actual fun parseDecimal(context: PlatformContext, value: String): Double? {
     val decimal = format.numberFromString(value) as NSDecimalNumber
-    decimal.doubleValue()
-} catch (_: NumberFormatException) {
-    null
+    return decimal.doubleValue()
 }
