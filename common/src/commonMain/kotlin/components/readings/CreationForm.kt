@@ -225,7 +225,6 @@ private fun CustomerInputField(
                 search,
                 { setCustomer(it); expanded = false },
                 hasCreator = true,
-                pickerHeight = .55f,
                 creationState = creatorState,
                 searchBar = {
                     SearchBarDefaults.InputField(

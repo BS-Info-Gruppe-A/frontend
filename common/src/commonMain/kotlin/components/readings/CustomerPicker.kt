@@ -70,7 +70,6 @@ fun CustomerPicker(
     search: String,
     onSelect: (Customer) -> Unit,
     hasCreator: Boolean = false,
-    pickerHeight: Float = 1f,
     model: CustomerPickerViewModel = viewModel { CustomerPickerViewModel(client) },
     creationState: CustomerCreationFormState = rememberCustomerCreationFormState(),
     searchBar: @Composable () -> Unit,
@@ -83,7 +82,10 @@ fun CustomerPicker(
         SharedTransitionLayout {
             AnimatedContent(state.customerCreationVisible, modifier.fillMaxWidth()) { visible ->
                 if (visible) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                            .sharedBounds(rememberSharedContentState("customer-creator"), this)
+                    ) {
                         Text(
                             "Kunden anlegen",
                             style = MaterialTheme.typography.titleLarge,
@@ -99,7 +101,6 @@ fun CustomerPicker(
                     Column(
                         Modifier
                             .sharedBounds(rememberSharedContentState("customer-picker"), this)
-                            .fillMaxHeight(pickerHeight)
                     ) {
                         searchBar()
                         if (currentState.customers == null) {
