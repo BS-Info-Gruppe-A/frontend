@@ -53,7 +53,7 @@ tasks {
         val libraryPath = if (System.getenv("GITHUB_REF") != null) {
             file("resources")
         } else {
-            file("target/release")
+            file("target/release").absoluteFile
         }
         val name = System.mapLibraryName("native_helper")
 
@@ -61,7 +61,7 @@ tasks {
             command,
             "--header-class-name", "NativeHelper",
             "--target-package", "eu.bsinfo.native_helper.generated",
-            "--library", ":${libraryPath.resolve(name).absolutePath}",
+            "--library", ":${libraryPath.resolve(name)}",
             "--output", jextractOutput.get().asFile.absolutePath,
             "--include-function", "free_c_string",
             "--include-function", "open_file",
