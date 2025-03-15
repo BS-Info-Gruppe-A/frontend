@@ -90,6 +90,12 @@ tasks {
     }
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xdont-warn-on-error-suppression")
+    }
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_22
 }
