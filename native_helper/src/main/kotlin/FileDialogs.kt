@@ -24,11 +24,9 @@ fun Collection<Filter>.allocate(allocator: SegmentAllocator): MemorySegment =
 
 fun Filter.allocate(allocator: SegmentAllocator, segment: MemorySegment = CFilter.allocate(allocator)): MemorySegment {
     CFilter.name(segment, allocator.allocateCString(name))
-    val spec = allocator.allocateStrings(spec)
-    CFilter.spec(segment, spec)
+    CFilter.spec(segment, allocator.allocateStrings(spec))
     return segment
 }
-
 
 fun openFile(vararg filters: Filter) = Arena.ofConfined().use {
     val cFilters = filters.asList().allocate(it)
@@ -43,6 +41,6 @@ fun saveFile(vararg filters: Filter) = Arena.ofConfined().use {
 }
 
 private fun MemorySegment.readFilePath(): String {
-    @Suppress("TYPE_MISMATCH") // For some reason the IDE gets this wrong
+    @Suppress("TYPE_MISMATCH") // For some reason, the IDE gets this wrong
     return readString().ifBlank { throw FileDialogCancelException() }
 }
