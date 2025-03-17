@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
     org.jetbrains.kotlin.jvm
@@ -58,9 +59,9 @@ compose.desktop {
             appResourcesRootDir.set(layout.buildDirectory.dir("dll"))
 
             when {
-//                HostManager.hostIsLinux -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
-//                HostManager.hostIsMac -> targetFormats(TargetFormat.Pkg)
-//                HostManager.hostIsMingw -> targetFormats(TargetFormat.Msi)
+                HostManager.hostIsLinux -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
+                HostManager.hostIsMac -> targetFormats(TargetFormat.Pkg)
+                HostManager.hostIsMingw -> targetFormats(TargetFormat.Msi)
                 else -> targetFormats(TargetFormat.AppImage)
             }
         }

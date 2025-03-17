@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.ElectricMeter
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.ui.graphics.vector.ImageVector
+import eu.bsinfo.components.CardFormattableEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -25,7 +26,8 @@ data class Reading(
     val meterCount: Double,
     val meterId: String,
     val substitute: Boolean
-) {
+) : CardFormattableEntity {
+    override val title: String = "Ablesung von $meterId"
     enum class Kind(override val humanName: String) : ReadableEnum {
         HEIZUNG("Heizung"),
         WASSER("Wasser"),

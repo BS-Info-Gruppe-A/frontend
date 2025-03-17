@@ -16,7 +16,7 @@ fun <T> Importer(
     importItem: suspend (T) -> Unit,
     serializer: KSerializer<T>,
     onClose: () -> Unit,
-    model: EntityViewModel
+    model: EntityViewModel<*>
 ) {
     var successfulItems by remember(importPath) { mutableStateOf(0) }
     var failedItems by remember(importPath) { mutableStateOf(0) }

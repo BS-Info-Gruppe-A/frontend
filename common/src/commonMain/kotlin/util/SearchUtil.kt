@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.aallam.similarity.JaroWinkler
+import eu.bsinfo.components.CardFormattableEntity
 import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import kotlin.jvm.JvmName
@@ -28,7 +29,7 @@ fun Iterable<Reading>.search(meterId: String) = asSequence()
     .toList()
 
 @Composable
-fun Customer.matchingName(matchingWith: String) = fullName.matching(matchingWith)
+fun CardFormattableEntity.matchingName(matchingWith: String) = title.matching(matchingWith)
 
 @Composable
 fun Reading.matching(matchingWith: String) = meterId.matching(matchingWith)

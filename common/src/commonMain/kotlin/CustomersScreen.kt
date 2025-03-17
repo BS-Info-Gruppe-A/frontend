@@ -1,33 +1,33 @@
 package eu.bsinfo
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cake
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RichTooltip
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import eu.bsinfo.components.DeleteDialog
-import eu.bsinfo.components.EntityContainer
-import eu.bsinfo.components.EntityViewModel
-import eu.bsinfo.components.EntityViewState
+import eu.bsinfo.components.*
 import eu.bsinfo.components.customer.CustomerCreationForm
+import eu.bsinfo.components.customer.CustomerPopup
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.LocalPlatformContext
 import eu.bsinfo.util.formatLocalDate
-import eu.bsinfo.util.matchingName
 import eu.bsinfo.util.search
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,10 +39,11 @@ data class CustomersScreenState(
     override val loading: Boolean = true,
     val customers: List<Customer> = emptyList(),
     override val query: String = "",
-    override val creationFormVisible: Boolean = false
+    override val creationFormVisible: Boolean = false,
+    val focusedCustomer: Customer? = null
 ) : EntityViewState
 
-class CustomersScreenModel(private val client: Client) : ViewModel(), EntityViewModel {
+class CustomersScreenModel(private val client: Client) : ViewModel(), EntityViewModel<Customer> {
     private val _uiState = MutableStateFlow(CustomersScreenState())
     override val uiState = _uiState.asStateFlow()
 
@@ -61,6 +62,14 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
     suspend fun deleteCustomer(customerId: Uuid) = withContext(Dispatchers.IO) {
         client.deleteCustomer(customerId)
         _uiState.emit(uiState.value.copy(customers = uiState.value.customers.filter { it.id != customerId }))
+    }
+
+    override fun focusEntity(entity: Customer) {
+        _uiState.tryEmit(_uiState.value.copy(focusedCustomer = entity))
+    }
+
+    override fun unfocusEntity() {
+        _uiState.tryEmit(_uiState.value.copy(focusedCustomer = null))
     }
 
     override fun openCreationForm() {
@@ -103,104 +112,21 @@ fun CustomersScreen(
             }
         }
     }
+
+    CustomerPopup(state.focusedCustomer, model)
 }
 
 @Composable
-private fun CustomerCard(customer: Customer, query: String, model: CustomersScreenModel) {
+fun CustomerCard(customer: Customer, query: String, model: CustomersScreenModel) {
     val context = LocalPlatformContext.current
-    ElevatedCard(
-        modifier = Modifier
-            .width(260.dp)
-            .height(100.dp)
-            .padding(vertical = 7.dp)
-    ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
-            Column(Modifier.padding(top = 3.dp, bottom = 10.dp)) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-                        tooltip = { RichTooltip { Text(customer.fullName) } },
-                        state = rememberTooltipState()
-                    ) {
-                        Text(
-                            customer.matchingName(query),
-                            style = MaterialTheme.typography.headlineSmall,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 7.dp)
-                                .fillMaxWidth(fraction = .9f)
-                        )
-                    }
-                    Spacer(Modifier.weight(1f))
-                    CustomerDropDown(customer, model)
-                }
-                Row(
-                    horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
-                ) {
-                    CustomerDetail(
-                        Icons.Filled.Person,
-                        customer.gender.humanName
-                    )
-                    CustomerDetail(
-                        icon = Icons.Filled.Cake,
-                        text = formatLocalDate(context, customer.birthDate)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CustomerDetail(icon: ImageVector, text: String) {
-    Row(Modifier.padding(horizontal = 3.dp)) {
-        Icon(
-            imageVector = icon, contentDescription = null
+    EntityCard(customer, query, model, { RichTooltip { Text(customer.fullName) } }) {
+        Detail(
+            Icons.Filled.Person,
+            customer.gender.humanName
         )
-        Spacer(modifier = Modifier.padding(horizontal = 3.dp))
-        Text(text)
-    }
-}
-
-@Composable
-private fun CustomerDropDown(customer: Customer, model: CustomersScreenModel) {
-    var expanded by remember { mutableStateOf(false) }
-    var isDeleting by remember { mutableStateOf(false) }
-
-    if (isDeleting) {
-        DeleteDialog(
-            isDeleting,
-            { isDeleting = false },
-            { model.deleteCustomer(customer.id) },
-            title = { Text("Kunden löschen?", color = MaterialTheme.colorScheme.onError) },
-            text = { Text("Möchten Sie den Kunden wirklich löschen?", color = MaterialTheme.colorScheme.onError) },
+        Detail(
+            icon = Icons.Filled.Cake,
+            text = formatLocalDate(context, customer.birthDate)
         )
-    }
-
-    Column(Modifier.padding(horizontal = 5.dp)) {
-        IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = null)
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                { Text("Update") },
-                {}
-            )
-            DropdownMenuItem(
-                { Text("Delete") },
-                { expanded = false; isDeleting = true }
-            )
-        }
     }
 }

@@ -1,5 +1,6 @@
 package eu.bsinfo.data
 
+import eu.bsinfo.components.CardFormattableEntity
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
@@ -10,8 +11,9 @@ data class Customer(
     val lastName: String,
     val birthDate: SerializableDate,
     val gender: Gender
-) {
+) : CardFormattableEntity {
     val fullName get() = "$firstName $lastName"
+    override val title: String get() = fullName
 
     enum class Gender(override val humanName: String): ReadableEnum {
         M("Männlich"), D("Divers"), W("Weiblich"), U("Unbekannt")

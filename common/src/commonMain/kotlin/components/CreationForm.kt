@@ -22,7 +22,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun CreationForm(
-    model: EntityViewModel,
+    model: EntityViewModel<*>,
     title: String,
     validate: () -> Boolean,
     onInsert: suspend CoroutineScope.() -> Unit,

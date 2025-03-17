@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -74,7 +75,7 @@ data class ReadingsScreenState(
     }
 }
 
-class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
+class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel<Reading> {
     private val _uiState = MutableStateFlow(ReadingsScreenState())
     override val uiState = _uiState.asStateFlow()
 
@@ -153,6 +154,14 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel {
     suspend fun deleteReading(readingId: Uuid) = withContext(Dispatchers.IO) {
         client.deleteReading(readingId)
         _uiState.emit(uiState.value.copy(readings = uiState.value.readings.filter { it.id != readingId }))
+    }
+
+    override fun focusEntity(entity: Reading) {
+        TODO("Not yet implemented")
+    }
+
+    override fun unfocusEntity() {
+        TODO("Not yet implemented")
     }
 
     private fun Long.toLocalDate(): LocalDate {
@@ -264,7 +273,7 @@ fun Filter(
 }
 
 @Composable
-private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenModel) {
+fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenModel) {
     ElevatedCard(
         modifier = Modifier
             .width(260.dp).wrapContentHeight()
@@ -300,7 +309,8 @@ private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenMo
                     Row {
                         ReadingDetail(
                             Icons.Filled.Person,
-                            reading.customer?.fullName ?: "Unbekannt"
+                            reading.customer?.fullName ?: "Unbekannt",
+                            modifier = Modifier.fillMaxWidth(.6f)
                         )
                         ReadingDetail(
                             icon = Icons.Filled.GasMeter,
@@ -324,13 +334,13 @@ private fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenMo
 }
 
 @Composable
-private fun ReadingDetail(icon: ImageVector, text: String) {
-    Row(Modifier.padding(horizontal = 3.dp)) {
+private fun ReadingDetail(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    Row(modifier.padding(horizontal = 3.dp)) {
         Icon(
             imageVector = icon, contentDescription = null
         )
         Spacer(modifier = Modifier.padding(horizontal = 3.dp))
-        Text(text)
+        Text(text, overflow = TextOverflow.Ellipsis)
     }
 }
 

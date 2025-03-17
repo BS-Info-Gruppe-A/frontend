@@ -34,13 +34,17 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.serializer
 
+interface CardFormattableEntity {
+    val title: String
+}
+
 interface EntityViewState {
     val query: String
     val creationFormVisible: Boolean
     val loading: Boolean
 }
 
-interface EntityViewModel {
+interface EntityViewModel<T : CardFormattableEntity> {
     val uiState: StateFlow<EntityViewState>
     suspend fun refresh()
 
@@ -49,12 +53,15 @@ interface EntityViewModel {
 
     fun openCreationForm()
     fun closeCreationForm()
+
+    fun focusEntity(entity: T)
+    fun unfocusEntity()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 inline fun <reified T> EntityContainer(
-    viewModel: EntityViewModel,
+    viewModel: EntityViewModel<*>,
     items: List<T>,
     noinline importItem: suspend (T) -> Unit,
     serializer: KSerializer<T> = serializer(),
@@ -164,7 +171,7 @@ fun <T> BigTastyBacon(
     importItem: suspend (T) -> Unit,
     items: List<T>,
     serializer: KSerializer<T>,
-    model: EntityViewModel
+    model: EntityViewModel<*>
 ) {
     val scope = rememberCoroutineScope()
     val exporterState = rememberExporterState()
