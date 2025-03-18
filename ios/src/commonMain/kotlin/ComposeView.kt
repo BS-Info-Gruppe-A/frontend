@@ -7,7 +7,8 @@ import eu.bsinfo.BSInfoApp
 import eu.bsinfo.util.PlatformContextImpl
 import eu.bsinfo.util.ProvidePlatformContext
 
-fun UIViewController() = ComposeUIViewController {
+@Suppress("FunctionName", "unused")
+fun MainUIViewController() = ComposeUIViewController {
     val viewController = LocalUIViewController.current
     val context = remember(viewController) { PlatformContextImpl(viewController) }
 

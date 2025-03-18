@@ -47,3 +47,4 @@ material = { group = "com.google.android.material", name = "material", version =
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+skie = { id = "co.touchlab.skie", version = "0.10.1" }

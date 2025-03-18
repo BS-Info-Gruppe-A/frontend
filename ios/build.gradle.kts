@@ -3,6 +3,7 @@ plugins {
     kotlin("native.cocoapods")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose)
+    alias(libs.plugins.skie)
 }
 
 kotlin {
@@ -32,5 +33,9 @@ kotlin {
                 implementation(compose.runtime)
             }
         }
+    }
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xbinary-bundleid=eu.bsinfo.ios")
     }
 }
