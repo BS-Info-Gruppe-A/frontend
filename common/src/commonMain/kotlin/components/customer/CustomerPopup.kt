@@ -91,10 +91,15 @@ private fun EditForm(customer: Customer, model: CustomersScreenModel, close: () 
     val scope = rememberCoroutineScope()
     val client = LocalClient.current
 
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
         IconButton(close) {
             Icon(Icons.AutoMirrored.Default.ArrowBack, "Close")
         }
+
+        Text("${customer.fullName} bearbeiten")
+
+        Spacer(Modifier.weight(1f))
     }
 
     CustomerCreationForm(state, saveButtonText = { Text("Speichern") }) {

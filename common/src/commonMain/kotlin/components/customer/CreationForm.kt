@@ -31,7 +31,7 @@ fun rememberCustomerUpdateFormState(customer: Customer) = remember(customer) { C
 @Composable
 fun rememberCustomerCreationFormState(key: Any? = null) = remember(key) { CustomerCreationFormState() }
 
-class CustomerCreationFormState(customer: Customer? = null) {
+class CustomerCreationFormState(val customer: Customer? = null) {
     val id = customer?.id ?: Uuid.random()
     var firstName by mutableStateOf(customer?.firstName ?: "")
     var firstNameIsError by mutableStateOf(false)
@@ -107,6 +107,7 @@ fun CustomerCreationInput(
             DatePickerInputField(
                 state.date, { state.dateIsError = false; state.date = it },
                 isError = state.dateIsError,
+                preSelect = state.customer?.birthDate?.atStartOfDayIn(TimeZone.currentSystemDefault()),
                 selectableDates = PastDates,
                 enabled = !disabled && state.enabled
             )

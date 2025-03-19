@@ -93,6 +93,7 @@ fun DatePickerInputField(
     setValue: (Instant) -> Unit,
     supportingText: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
+    preSelect: Instant?=null,
     selectableDates: SelectableDates = DatePickerDefaults.AllDates,
     enabled: Boolean = true,
     modifier: Modifier = Modifier
@@ -115,7 +116,10 @@ fun DatePickerInputField(
         })
 
     if (visible) {
-        val state = rememberDatePickerState(selectableDates = selectableDates)
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = preSelect?.toEpochMilliseconds(),
+            selectableDates = selectableDates
+        )
         DatePickerDialog(
             { visible = false },
             confirmButton = {
