@@ -21,7 +21,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
-fun CreationForm(
+fun CreationSheet(
     model: EntityViewModel<*>,
     title: String,
     validate: () -> Boolean,
@@ -31,8 +31,6 @@ fun CreationForm(
 ) = BoxWithConstraints {
     val state by model.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var loading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     if (state.creationFormVisible) {
         ModalBottomSheet(
@@ -47,34 +45,44 @@ fun CreationForm(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(15.dp),
-                modifier = Modifier.padding(vertical = 20.dp),
-                content = {
-                    content(loading)
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 15.dp, horizontal = 25.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button({
-                            loading = true
-                            scope.launch {
-                                if (validate()) {
-                                    onInsert()
-                                }
-                                loading = false
-                            }
-                        }) {
-                            if (loading) {
-                                CircularProgressIndicator(modifier = Modifier.size(ButtonDefaults.IconSize))
-                            } else {
-                                Icon(Icons.Default.Save, "Create")
-                            }
-                            Text("Erstellen")
-                        }
+            CreationForm(validate, onInsert, { Text("Erstellen") }, { Icon(Icons.Default.Save, "Save") }, content)
+        }
+    }
+}
+
+@Composable
+fun CreationForm(
+    validate: () -> Boolean,
+    onSave: suspend CoroutineScope.() -> Unit,
+    saveButtonIcon: @Composable () -> Unit,
+    saveButtonText: @Composable () -> Unit,
+    content: @Composable ColumnScope.(Boolean) -> Unit,
+) {
+    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    Column {
+        content(loading)
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 15.dp, horizontal = 25.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Button({
+                loading = true
+                scope.launch {
+                    if (validate()) {
+                        onSave()
                     }
+                    loading = false
                 }
-            )
+            }) {
+                if (loading) {
+                    CircularProgressIndicator(modifier = Modifier.size(ButtonDefaults.IconSize))
+                } else {
+                    saveButtonIcon()
+                }
+                saveButtonText()
+            }
         }
     }
 }
@@ -167,8 +175,17 @@ inline fun <reified E> EnumInputField(
 }
 
 @Composable
-fun Labeled(label: String, alignment: Alignment.Horizontal = Alignment.Start, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) = Column {
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically), horizontalAlignment = alignment, modifier = modifier) {
+fun Labeled(
+    label: String,
+    alignment: Alignment.Horizontal = Alignment.Start,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) = Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
+        horizontalAlignment = alignment,
+        modifier = modifier
+    ) {
         Text(label, style = MaterialTheme.typography.headlineSmall)
         content()
     }

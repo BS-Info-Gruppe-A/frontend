@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.components.*
-import eu.bsinfo.components.customer.CustomerCreationForm
+import eu.bsinfo.components.customer.CustomerCreationFormState
+import eu.bsinfo.components.customer.CustomerCreationSheet
 import eu.bsinfo.components.customer.CustomerPopup
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.Client
@@ -79,6 +80,14 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
     override fun closeCreationForm() {
         _uiState.tryEmit(uiState.value.copy(creationFormVisible = false))
     }
+
+    suspend fun updateCustomer(client: Client, state: CustomerCreationFormState) = withContext(Dispatchers.IO) {
+        val customer = state.toCustomer()
+
+        client.updateCustomer(customer.toUpdatableCustomer())
+
+        focusEntity(customer)
+    }
 }
 
 @Composable
@@ -100,7 +109,7 @@ fun CustomersScreen(
         addButtonText = { Text("Kunden erstellen") },
         searchPlaceholder = { Text("Suche nach Kundenname") }
     ) {
-        CustomerCreationForm(model)
+        CustomerCreationSheet(model)
         LazyVerticalGrid(
             GridCells.Adaptive(260.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),

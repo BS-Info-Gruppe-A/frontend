@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.ReadingsScreenModel
-import eu.bsinfo.components.CreationForm
+import eu.bsinfo.components.CreationSheet
 import eu.bsinfo.components.DatePickerInputField
 import eu.bsinfo.components.EnumInputField
 import eu.bsinfo.components.Labeled
@@ -22,11 +22,7 @@ import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
-import eu.bsinfo.util.LocalPlatformContext
-import eu.bsinfo.util.PastDates
-import eu.bsinfo.util.format
-import eu.bsinfo.util.formatDecimal
-import eu.bsinfo.util.parseDecimal
+import eu.bsinfo.util.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -51,7 +47,7 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
     var substitute by remember(state) { mutableStateOf(false) }
     val client = LocalClient.current
 
-    CreationForm(model, "Ablesung erstellen", {
+    CreationSheet(model, "Ablesung erstellen", {
         customerIsError = customer == null
         dateIsError = date > Clock.System.now()
         kindIsError = kind == null

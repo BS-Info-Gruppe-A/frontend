@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.bsinfo.ReadingCard
@@ -35,7 +36,6 @@ fun ReadingList(forCustomer: Uuid) {
     val client = LocalClient.current
     val model = viewModel { ReadingsScreenModel(client) }
 
-
     if (loading) {
         LaunchedEffect(forCustomer) {
             readings = client.getReadings(customerId = forCustomer).readings
@@ -48,13 +48,13 @@ fun ReadingList(forCustomer: Uuid) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Text("Es gibt keine Ablesungen für diesen Kunden")
+                Text("Es gibt keine Ablesungen für diesen Kunden", textAlign = TextAlign.Center)
                 CreateReadingButton {
 
                 }
             }
         } else {
-            LazyColumn {
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 items(readings) {
                     ReadingCard(it, "", model)
                 }

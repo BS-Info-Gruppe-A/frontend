@@ -15,6 +15,8 @@ data class Customer(
     val fullName get() = "$firstName $lastName"
     override val title: String get() = fullName
 
+    fun toUpdatableCustomer() = UpdatableCustomer(id, firstName, lastName, gender)
+
     enum class Gender(override val humanName: String): ReadableEnum {
         M("Männlich"), D("Divers"), W("Weiblich"), U("Unbekannt")
     }

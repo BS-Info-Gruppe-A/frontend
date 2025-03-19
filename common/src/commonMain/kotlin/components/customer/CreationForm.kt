@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -11,36 +14,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import eu.bsinfo.CustomersScreenModel
-import eu.bsinfo.components.CreationForm
-import eu.bsinfo.components.DatePickerInputField
-import eu.bsinfo.components.EnumInputField
-import eu.bsinfo.components.Labeled
+import eu.bsinfo.components.*
 import eu.bsinfo.data.Customer
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.PastDates
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.uuid.Uuid
 
 @Composable
+fun rememberCustomerUpdateFormState(customer: Customer) = remember(customer) { CustomerCreationFormState(customer) }
+
+@Composable
 fun rememberCustomerCreationFormState(key: Any? = null) = remember(key) { CustomerCreationFormState() }
 
-class CustomerCreationFormState {
-    var firstName by mutableStateOf("")
+class CustomerCreationFormState(customer: Customer? = null) {
+    val id = customer?.id ?: Uuid.random()
+    var firstName by mutableStateOf(customer?.firstName ?: "")
     var firstNameIsError by mutableStateOf(false)
-    var lastName by mutableStateOf("")
+    var lastName by mutableStateOf(customer?.lastName ?: "")
     var lastNameIsError by mutableStateOf(false)
-    var date by mutableStateOf(Clock.System.now())
+    var date by mutableStateOf(
+        customer?.birthDate?.atStartOfDayIn(TimeZone.currentSystemDefault()) ?: Clock.System.now()
+    )
     var dateIsError by mutableStateOf(false)
-    var gender by mutableStateOf<Customer.Gender?>(null)
+    var gender by mutableStateOf<Customer.Gender?>(customer?.gender)
     var genderIsError by mutableStateOf(false)
     var enabled by mutableStateOf(true)
 
     val isValid by derivedStateOf { firstName.isNotBlank() && lastName.isNotBlank() && gender != null }
 
     fun toCustomer() = Customer(
-        Uuid.random(),
+        id,
         firstName,
         lastName,
         date.toLocalDateTime(TimeZone.currentSystemDefault()).date,
@@ -107,11 +115,11 @@ fun CustomerCreationInput(
 }
 
 @Composable
-fun CustomerCreationForm(model: CustomersScreenModel) {
+fun CustomerCreationSheet(model: CustomersScreenModel) {
     val apiClient = LocalClient.current
     val state = rememberCustomerCreationFormState(model.uiState.value)
 
-    CreationForm(
+    CreationSheet(
         model, "Kunde erstellen",
         onInsert = {
             apiClient.createCustomer(
@@ -128,4 +136,16 @@ fun CustomerCreationForm(model: CustomersScreenModel) {
         },
         validate = state::validate,
     ) { loading -> CustomerCreationInput(state, loading) }
+}
+
+@Composable
+fun CustomerCreationForm(
+    state: CustomerCreationFormState,
+    saveButtonIcon: @Composable () -> Unit = { Icon(Icons.Default.Save, "Save") },
+    saveButtonText: @Composable () -> Unit,
+    onSave: suspend CoroutineScope.() -> Unit
+) {
+    CreationForm(state::validate, onSave, saveButtonIcon, saveButtonText) { loading ->
+        CustomerCreationInput(state, loading)
+    }
 }
