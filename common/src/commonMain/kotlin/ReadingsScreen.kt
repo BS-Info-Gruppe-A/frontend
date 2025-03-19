@@ -173,6 +173,7 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel<Rea
 
 @Composable
 fun ReadingsScreen(
+    route: MainScreen.Readings,
     client: Client = LocalClient.current,
     model: ReadingsScreenModel = viewModel { ReadingsScreenModel(client) }
 ) {
@@ -204,7 +205,7 @@ fun ReadingsScreen(
         }
     }
 
-    ReadingCreationForm(model)
+    ReadingCreationForm(model, route)
     ReadingDatePicker(state, model)
     KindPicker(state, model)
     CustomerPickerSheet(client, state.isCustomerSheetVisible, { model.closeCustomerSheet() }, {

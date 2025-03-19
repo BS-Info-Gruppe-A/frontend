@@ -10,6 +10,7 @@ plugins {
 dependencies {
     implementation(projects.common)
     implementation(compose.desktop.currentOs)
+    implementation(compose.components.resources)
 
     // Logging
     implementation(libs.jansi)
@@ -49,34 +50,40 @@ tasks {
     }
 }
 
-compose.desktop {
-    application {
-        mainClass = "eu.bsinfo.desktop.MainKt"
-        jvmArgs("--enable-native-access=ALL-UNNAMED")
+compose {
+    resources {
+        packageOfResClass = "eu.bsinfo.desktop"
+    }
 
-        nativeDistributions {
-            modules("java.naming", "java.net.http")
-            appResourcesRootDir.set(layout.buildDirectory.dir("dll"))
+    desktop {
+        application {
+            mainClass = "eu.bsinfo.desktop.MainKt"
+            jvmArgs("--enable-native-access=ALL-UNNAMED")
 
-            when {
-                HostManager.hostIsLinux -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
-                HostManager.hostIsMac -> targetFormats(TargetFormat.Pkg)
-                HostManager.hostIsMingw -> targetFormats(TargetFormat.Msi)
-                else -> targetFormats(TargetFormat.AppImage)
+            nativeDistributions {
+                modules("java.naming", "java.net.http")
+                appResourcesRootDir.set(layout.buildDirectory.dir("dll"))
+
+                when {
+                    HostManager.hostIsLinux -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
+                    HostManager.hostIsMac -> targetFormats(TargetFormat.Pkg)
+                    HostManager.hostIsMingw -> targetFormats(TargetFormat.Msi)
+                    else -> targetFormats(TargetFormat.AppImage)
+                }
             }
-        }
 
-        buildTypes {
-            release {
-                proguard {
-                    version = libs.versions.proguard
-                    obfuscate = true
-                    configurationFiles.from(
-                        fileTree(collectProguardConfigs.map { it.destinationDir }) {
-                            include("*.pro")
-                        },
-                        project.file("rules.pro")
-                    )
+            buildTypes {
+                release {
+                    proguard {
+                        version = libs.versions.proguard
+                        obfuscate = true
+                        configurationFiles.from(
+                            fileTree(collectProguardConfigs.map { it.destinationDir }) {
+                                include("*.pro")
+                            },
+                            project.file("rules.pro")
+                        )
+                    }
                 }
             }
         }

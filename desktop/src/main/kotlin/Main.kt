@@ -7,13 +7,14 @@ import eu.bsinfo.BSInfoApp
 import eu.bsinfo.native_helper.generated.NativeHelper
 import eu.bsinfo.util.PlatformContextImpl
 import eu.bsinfo.util.ProvidePlatformContext
+import org.jetbrains.compose.resources.painterResource
 
 fun main() = application {
     // Calling this forces the class loader to load the class and perform the symbol lookup at startup
     // This makes upcoming native calls faster
     SideEffect { NativeHelper.size_t }
     ProvidePlatformContext(PlatformContextImpl(this@application)) {
-        Window(title = "HausFix", onCloseRequest = ::exitApplication) {
+        Window(title = "HausFix", icon = painterResource(Res.drawable.logo), onCloseRequest = ::exitApplication) {
             BSInfoApp()
         }
     }

@@ -12,6 +12,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import eu.bsinfo.MainScreen
 import eu.bsinfo.ReadingsScreenModel
 import eu.bsinfo.components.CreationSheet
 import eu.bsinfo.components.DatePickerInputField
@@ -31,10 +32,10 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.uuid.Uuid
 
 @Composable
-fun ReadingCreationForm(model: ReadingsScreenModel) {
+fun ReadingCreationForm(model: ReadingsScreenModel, route: MainScreen.Readings) {
     val state by model.uiState.collectAsState()
     var comment by remember(state) { mutableStateOf("") }
-    var customer by remember(state) { mutableStateOf<Customer?>(null) }
+    var customer by remember(state) { mutableStateOf<Customer?>(route.createForCustomer) }
     var customerIsError by remember(state) { mutableStateOf(false) }
     var date by remember(state) { mutableStateOf<Instant>(Clock.System.now()) }
     var dateIsError by remember(state) { mutableStateOf(false) }
@@ -46,6 +47,12 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
     var meterIdIsError by remember(state) { mutableStateOf(false) }
     var substitute by remember(state) { mutableStateOf(false) }
     val client = LocalClient.current
+
+    LaunchedEffect(route) {
+        if (route.createForCustomer != null) {
+            model.openCreationForm()
+        }
+    }
 
     CreationSheet(model, "Ablesung erstellen", {
         customerIsError = customer == null
@@ -136,6 +143,7 @@ fun ReadingCreationForm(model: ReadingsScreenModel) {
             Labeled("Kunde") {
                 CustomerInputField(
                     customer, { customer = it; customerIsError = false }, isError = customerIsError,
+                    enabled = route.createForCustomer == null,
                     modifier = Modifier.fillMaxWidth(.3f)
                 )
             }

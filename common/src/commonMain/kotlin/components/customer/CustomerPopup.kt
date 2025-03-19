@@ -69,7 +69,7 @@ fun CustomerPopup(focusedCustomer: Customer?, model: CustomersScreenModel) {
                     if (it) {
                         EditForm(focusedCustomer, model) { isEditMode = false }
                     } else {
-                        CustomerDetails(focusedCustomer, { isEditMode = true }, { isDeleteDialogPresent = true })
+                        CustomerDetails(model, focusedCustomer, { isEditMode = true }, { isDeleteDialogPresent = true })
                     }
                 }
             }
@@ -110,7 +110,7 @@ private fun EditForm(customer: Customer, model: CustomersScreenModel, close: () 
 }
 
 @Composable
-private fun CustomerDetails(customer: Customer, openEditMode: () -> Unit, openDeleteMode: () -> Unit) {
+private fun CustomerDetails(model: CustomersScreenModel, customer: Customer, openEditMode: () -> Unit, openDeleteMode: () -> Unit) {
     val context = LocalPlatformContext.current
 
     Column {
@@ -170,7 +170,7 @@ private fun CustomerDetails(customer: Customer, openEditMode: () -> Unit, openDe
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()
                 )
-                ReadingList(customer.id)
+                ReadingList(model, customer)
             }
         }
     }
