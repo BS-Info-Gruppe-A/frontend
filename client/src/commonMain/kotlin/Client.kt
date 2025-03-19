@@ -1,6 +1,5 @@
-package eu.bsinfo.rest
+package eu.bsinfo.data
 
-import eu.bsinfo.data.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -71,7 +70,7 @@ class Client {
     suspend fun createCustomer(request: Customer) = client.post(Route.Customers()) {
         contentType(ContentType.Application.Json)
         setBody(request)
-    }
+    }.body<Unit>()
 
     suspend fun getReadings(
         from: SerializableDate? = null,
@@ -88,6 +87,7 @@ class Client {
     suspend fun createReading(request: Reading) = client.post(Route.Readings()) {
         contentType(ContentType.Application.Json)
         setBody(request)
-    }
+    }.body<Unit>()
+
     suspend fun deleteReading(id: Uuid) = client.delete(Route.Readings.Specific(id)).body<Unit>()
 }

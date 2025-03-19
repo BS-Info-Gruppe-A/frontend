@@ -1,3 +1,4 @@
+import eu.bsinfo.build.uiTargets
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
@@ -28,10 +29,7 @@ kotlin {
             }
         }
     }
-    jvm()
-    wasmJs {
-        browser()
-    }
+    uiTargets()
 
     compilerOptions {
         optIn.addAll(
@@ -45,6 +43,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(projects.fileDialog)
+                implementation(projects.client)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ktor.client.core)

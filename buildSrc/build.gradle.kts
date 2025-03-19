@@ -12,6 +12,7 @@ repositories {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_21
+        optIn.add("org.jetbrains.kotlin.gradle.ExperimentalWasmDsl")
     }
 }
 

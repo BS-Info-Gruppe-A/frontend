@@ -11,4 +11,4 @@ pluginManagement {
 
 rootProject.name = "bsinfo-app"
 
-include("file_dialog", "native_helper", "common", "desktop", "web", "android", "ios")
+include("client", "cli", "file_dialog", "native_helper", "common", "desktop", "web", "android", "ios")

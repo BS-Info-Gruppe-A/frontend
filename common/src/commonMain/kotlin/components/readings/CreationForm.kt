@@ -19,9 +19,9 @@ import eu.bsinfo.components.DatePickerInputField
 import eu.bsinfo.components.EnumInputField
 import eu.bsinfo.components.Labeled
 import eu.bsinfo.components.customer.rememberCustomerCreationFormState
+import eu.bsinfo.data.Client
 import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
-import eu.bsinfo.rest.Client
 import eu.bsinfo.rest.LocalClient
 import eu.bsinfo.util.*
 import kotlinx.coroutines.launch

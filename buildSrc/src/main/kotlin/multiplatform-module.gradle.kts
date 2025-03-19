@@ -3,7 +3,7 @@
 import eu.bsinfo.build.androidCompileSdk
 import eu.bsinfo.build.androidMinSdk
 import eu.bsinfo.build.javaVersion
-import eu.bsinfo.build.kotlinJvmTarget
+import eu.bsinfo.build.uiTargets
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
@@ -24,19 +24,7 @@ kotlin {
         }
     }
 
-    jvm()
-    androidTarget {
-        compilerOptions {
-            jvmTarget = kotlinJvmTarget
-        }
-    }
-    wasmJs {
-        browser()
-    }
-
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    uiTargets()
 }
 
 android {

@@ -7,6 +7,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import com.aallam.similarity.JaroWinkler
 import eu.bsinfo.components.CardFormattableEntity
 import eu.bsinfo.data.Customer
+import eu.bsinfo.data.Identifiable
 import eu.bsinfo.data.Reading
 import kotlin.jvm.JvmName
 
@@ -29,7 +30,7 @@ fun Iterable<Reading>.search(meterId: String) = asSequence()
     .toList()
 
 @Composable
-fun CardFormattableEntity.matchingName(matchingWith: String) = title.matching(matchingWith)
+fun Identifiable.matchingName(matchingWith: String) = displayName.matching(matchingWith)
 
 @Composable
 fun Reading.matching(matchingWith: String) = meterId.matching(matchingWith)

@@ -7,10 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import eu.bsinfo.data.Identifiable
 import eu.bsinfo.util.matchingName
 
 @Composable
-fun <T : CardFormattableEntity> EntityCard(
+fun <T : Identifiable> EntityCard(
     entity: T,
     query: String,
     model: EntityViewModel<T>,

@@ -25,8 +25,8 @@ import eu.bsinfo.components.LoadingSpinner
 import eu.bsinfo.components.customer.CustomerCreationFormState
 import eu.bsinfo.components.customer.CustomerCreationInput
 import eu.bsinfo.components.customer.rememberCustomerCreationFormState
+import eu.bsinfo.data.Client
 import eu.bsinfo.data.Customer
-import eu.bsinfo.rest.Client
 import eu.bsinfo.util.focusable
 import eu.bsinfo.util.matchingName
 import eu.bsinfo.util.search
