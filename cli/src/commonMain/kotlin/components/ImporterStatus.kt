@@ -51,8 +51,8 @@ fun Log(jobs: List<ImportCommand.Job>) {
 fun Status(jobs: List<ImportCommand.Job>) {
     val running = jobs.filter { it.state == ImportCommand.Job.State.Running }
     if (running.isNotEmpty()) {
-        for (test in running) {
-            JobRow(test)
+        for (job in running) {
+            JobRow(job)
         }
 
         Spacer(Modifier.height(1)) // Blank line
