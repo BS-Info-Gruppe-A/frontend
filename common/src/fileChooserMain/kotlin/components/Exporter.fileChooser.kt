@@ -9,12 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import eu.bsinfo.data.Format
 import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
-import kotlinx.serialization.KSerializer
-import eu.bsinfo.util.formats
 import eu.bsinfo.util.FileHandle
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 
 expect val supportsBrowseDirectory: Boolean
@@ -38,8 +38,8 @@ actual fun ExporterDropdownEntry(state: ExporterState, onClose: () -> Unit) {
     DropdownMenuItem({ Text("Export") }, {
         scope.launch {
             try {
-                state.exportPath = openSaveDialog(*formats.keys.map {
-                    Filter(it, it)
+                state.exportPath = openSaveDialog(*Format.entries.map {
+                    Filter(it.extension, it.extension)
                 }.toTypedArray())
             } catch (_: FileDialogCancelException) {
                 onClose()
