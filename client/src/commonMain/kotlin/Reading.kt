@@ -1,12 +1,5 @@
 package eu.bsinfo.data
 
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.DeviceUnknown
-//import androidx.compose.material.icons.filled.ElectricMeter
-//import androidx.compose.material.icons.filled.Thermostat
-//import androidx.compose.material.icons.filled.WaterDrop
-//import androidx.compose.ui.graphics.vector.ImageVector
-//import eu.bsinfo.components.CardFormattableEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -28,6 +21,11 @@ data class Reading(
     val substitute: Boolean
 ) : Identifiable {
     override val displayName: String = "Ablesung von $meterId"
+
+    fun toUpdatableReading() = UpdatableReading(
+        id, date, comment, meterId.toIntOrNull(), substitute, meterCount, kind
+    )
+
     enum class Kind(override val humanName: String) : ReadableEnum {
         HEIZUNG("Heizung"),
         WASSER("Wasser"),

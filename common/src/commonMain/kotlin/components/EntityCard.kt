@@ -14,17 +14,17 @@ import eu.bsinfo.util.matchingName
 fun <T : Identifiable> EntityCard(
     entity: T,
     query: String,
-    model: EntityViewModel<T>,
+    onClick: (() -> Unit)? = null,
     tooltip: @Composable TooltipScope.() -> Unit = {},
     details: @Composable () -> Unit = {}
 ) {
-    ElevatedCard(
-        onClick = { model.focusEntity(entity) },
-        modifier = Modifier
-            .width(260.dp)
-            .height(100.dp)
-            .padding(vertical = 7.dp)
-    ) {
+    val modifier = Modifier
+        .width(260.dp)
+        .height(100.dp)
+        .padding(vertical = 7.dp)
+
+    @Composable
+    fun Content() {
         Box(
             Modifier
                 .fillMaxWidth()
@@ -60,11 +60,20 @@ fun <T : Identifiable> EntityCard(
             }
         }
     }
+
+    if (onClick != null) {
+        ElevatedCard(
+            onClick = onClick,
+            modifier = modifier
+        ) { Content() }
+    } else {
+        ElevatedCard(modifier = modifier) { Content() }
+    }
 }
 
 @Composable
-fun Detail(icon: ImageVector, text: String) {
-    Row(Modifier.padding(horizontal = 3.dp)) {
+fun Detail(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    Row(modifier.padding(horizontal = 3.dp)) {
         Icon(imageVector = icon, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 3.dp))
         Text(text)

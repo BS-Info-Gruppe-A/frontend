@@ -13,8 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import eu.bsinfo.*
+import eu.bsinfo.CustomersScreenModel
+import eu.bsinfo.LocalNavController
+import eu.bsinfo.MainScreen
+import eu.bsinfo.ReadingCard
 import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
 import eu.bsinfo.rest.LocalClient
@@ -24,7 +26,6 @@ fun ReadingList(customerModel: CustomersScreenModel,forCustomer: Customer) {
     var loading by remember(forCustomer) { mutableStateOf(true) }
     var readings by remember(forCustomer) { mutableStateOf(emptyList<Reading>()) }
     val client = LocalClient.current
-    val model = viewModel { ReadingsScreenModel(client) }
     val navHost = LocalNavController.current
 
     fun createReading() {
@@ -50,7 +51,7 @@ fun ReadingList(customerModel: CustomersScreenModel,forCustomer: Customer) {
         } else {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 items(readings) {
-                    ReadingCard(it, "", model)
+                    ReadingCard(it)
                 }
 
                 item {

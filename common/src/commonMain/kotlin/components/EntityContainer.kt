@@ -35,10 +35,6 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.serializer
 
-interface CardFormattableEntity {
-    val title: String
-}
-
 interface EntityViewState {
     val query: String
     val creationFormVisible: Boolean

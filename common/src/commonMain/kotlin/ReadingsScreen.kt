@@ -8,24 +8,18 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import eu.bsinfo.components.DeleteDialog
-import eu.bsinfo.components.EntityContainer
-import eu.bsinfo.components.EntityViewModel
-import eu.bsinfo.components.EntityViewState
-import eu.bsinfo.components.readings.CustomerPickerSheet
-import eu.bsinfo.components.readings.KindPicker
-import eu.bsinfo.components.readings.ReadingCreationForm
-import eu.bsinfo.components.readings.ReadingDatePicker
+import eu.bsinfo.components.*
+import eu.bsinfo.components.readings.*
 import eu.bsinfo.data.Client
 import eu.bsinfo.data.Customer
 import eu.bsinfo.data.Reading
@@ -54,6 +48,7 @@ data class ReadingsScreenState(
     override val creationFormVisible: Boolean = false,
     override val query: String = "",
     val readings: List<Reading> = emptyList(),
+    val focusedReading: Reading? = null
 ) : EntityViewState {
     fun formatDate(context: PlatformContext): String? {
         val startDate = selectedStartDate
@@ -151,12 +146,19 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel<Rea
         _uiState.emit(uiState.value.copy(readings = uiState.value.readings.filter { it.id != readingId }))
     }
 
+    suspend fun updateReading(client: Client, state: ReadingCreationFormState) = withContext(Dispatchers.IO) {
+        val reading = state.toReading()
+
+        client.updateReading(reading.toUpdatableReading())
+        focusEntity(reading)
+    }
+
     override fun focusEntity(entity: Reading) {
-        TODO("Not yet implemented")
+        _uiState.tryEmit(uiState.value.copy(focusedReading = entity))
     }
 
     override fun unfocusEntity() {
-        TODO("Not yet implemented")
+        _uiState.tryEmit(uiState.value.copy(focusedReading = null))
     }
 
     private fun Long.toLocalDate(): LocalDate {
@@ -195,14 +197,15 @@ fun ReadingsScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             items(state.readings) { reading ->
-                ReadingCard(reading, state.query, model)
+                ReadingCard(reading, state.query, { model.focusEntity(reading) })
             }
         }
     }
 
-    ReadingCreationForm(model, route)
+    ReadingCreationSheet(model, route)
     ReadingDatePicker(state, model)
     KindPicker(state, model)
+    ReadingPopup(state.focusedReading, model)
     CustomerPickerSheet(client, state.isCustomerSheetVisible, { model.closeCustomerSheet() }, {
         scope.launch { model.setCustomer(it) }
     })
@@ -269,112 +272,29 @@ fun Filter(
 }
 
 @Composable
-fun ReadingCard(reading: Reading, query: String, model: ReadingsScreenModel) {
-    ElevatedCard(
-        modifier = Modifier
-            .width(260.dp).wrapContentHeight()
-            .padding(vertical = 7.dp)
-    ) {
+fun ReadingCard(reading: Reading, query: String = "", onClick: (() -> Unit)? = null) {
+    EntityCard(reading, query, onClick) {
         val context = LocalPlatformContext.current
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
-            Column(Modifier.padding(top = 3.dp, bottom = 10.dp)) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val meterId = reading.matching(query)
 
-                    Text(
-                        AnnotatedString("Ablesung von ") + meterId,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 7.dp)
-                            .fillMaxWidth(fraction = .9f)
-                    )
-                    Spacer(Modifier.weight(1f))
-                    ReadingDropDown(reading, model)
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                    horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row {
-                        ReadingDetail(
-                            Icons.Filled.Person,
-                            reading.customer?.fullName ?: "Unbekannt",
-                            modifier = Modifier.fillMaxWidth(.6f)
-                        )
-                        ReadingDetail(
-                            icon = Icons.Filled.GasMeter,
-                            text = reading.meterCount.format(context)
-                        )
-                    }
-                    Row {
-                        ReadingDetail(
-                            icon = Icons.Filled.CalendarToday,
-                            text = formatLocalDate(context, reading.date)
-                        )
-                        ReadingDetail(
-                            icon = Icons.Filled.ElectricMeter,
-                            text = reading.kind.humanName
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReadingDetail(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
-    Row(modifier.padding(horizontal = 3.dp)) {
-        Icon(
-            imageVector = icon, contentDescription = null
-        )
-        Spacer(modifier = Modifier.padding(horizontal = 3.dp))
-        Text(text, overflow = TextOverflow.Ellipsis)
-    }
-}
-
-@Composable
-private fun ReadingDropDown(customer: Reading, model: ReadingsScreenModel) {
-    var expanded by remember { mutableStateOf(false) }
-    var isDeleting by remember { mutableStateOf(false) }
-
-    if (isDeleting) {
-        DeleteDialog(
-            isDeleting,
-            { isDeleting = false },
-            { model.deleteReading(customer.id) },
-            title = { Text("Ablesung löschen?", color = MaterialTheme.colorScheme.onError) },
-            text = {
-                Text(
-                    "Möchten Sie die Ablesung wirklich löschen?",
-                    color = MaterialTheme.colorScheme.onError
-                )
-            },
-        )
-    }
-
-    Column(Modifier.padding(horizontal = 5.dp)) {
-        IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = null)
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                { Text("Update") },
-                {}
+        Row {
+            Detail(
+                Icons.Filled.Person,
+                reading.customer?.fullName ?: "Unbekannt",
+                modifier = Modifier.fillMaxWidth(.6f)
             )
-            DropdownMenuItem(
-                { Text("Delete") },
-                { expanded = false; isDeleting = true }
+            Detail(
+                icon = Icons.Filled.GasMeter,
+                text = reading.meterCount.format(context)
+            )
+        }
+        Row {
+            Detail(
+                icon = Icons.Filled.CalendarToday,
+                text = formatLocalDate(context, reading.date)
+            )
+            Detail(
+                icon = Icons.Filled.ElectricMeter,
+                text = reading.kind.humanName
             )
         }
     }
