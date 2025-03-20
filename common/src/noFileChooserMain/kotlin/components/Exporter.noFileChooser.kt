@@ -13,10 +13,8 @@ import eu.bsinfo.common.generated.resources.Res
 import eu.bsinfo.common.generated.resources.csv_24px
 import eu.bsinfo.common.generated.resources.file_json_24px
 import eu.bsinfo.common.generated.resources.twemoji_poop
+import eu.bsinfo.data.Format
 import eu.bsinfo.util.FileHandle
-import eu.bsinfo.util.formats
-import io.ktor.util.*
-import io.ktor.utils.io.core.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.StringFormat
@@ -25,23 +23,14 @@ import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalSerializationApi::class)
-val StringFormat.extension: String
-    get() = when (this) {
-        is Json -> "json"
-        is CSVFormat -> "csv"
-        is XML -> "xml"
-        else -> error("Unknown format: $this")
-    }
 
 @OptIn(ExperimentalSerializationApi::class)
-val StringFormat.icon: Painter
+val Format.icon: Painter
     @Composable
     get() = when (this) {
-        is Json -> painterResource(Res.drawable.file_json_24px)
-        is CSVFormat -> painterResource(Res.drawable.csv_24px)
-        is XML -> painterResource(Res.drawable.twemoji_poop)
-        else -> error("Unknown format: $this")
+        Format.JSON -> painterResource(Res.drawable.file_json_24px)
+        Format.CSV -> painterResource(Res.drawable.csv_24px)
+        Format.XML -> painterResource(Res.drawable.twemoji_poop)
     }
 
 interface FileSaver {
@@ -73,14 +62,14 @@ actual fun ExporterDropdownEntry(state: ExporterState, onClose: () -> Unit) {
         )
 
         ExposedDropdownMenu(isOpen, { isOpen = false }) {
-            formats.forEach { (name, format) ->
+            Format.entries.forEach {
                 DropdownMenuItem(
-                    { Text(name) },
-                    onClick = { state.handle = FileHandle("output.${format.extension}") },
+                    { Text(it.name) },
+                    onClick = { state.handle = FileHandle("output.${it.extension}") },
                     leadingIcon = {
                         Icon(
-                            format.icon,
-                            format.extension,
+                            it.icon,
+                            it.extension,
                             tint = LocalContentColor.current,
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
