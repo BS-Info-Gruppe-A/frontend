@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import app.softwork.serialization.csv.CSVFormat
 import eu.bsinfo.common.generated.resources.Res
 import eu.bsinfo.common.generated.resources.csv_24px
 import eu.bsinfo.common.generated.resources.file_json_24px
@@ -17,10 +16,7 @@ import eu.bsinfo.data.Format
 import eu.bsinfo.util.FileHandle
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
-import nl.adaptivity.xmlutil.serialization.XML
 import org.jetbrains.compose.resources.painterResource
 
 

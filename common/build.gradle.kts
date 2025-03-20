@@ -43,7 +43,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(projects.fileDialog)
-                implementation(projects.client)
+                api(projects.client)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ktor.client.core)
