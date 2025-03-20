@@ -10,7 +10,7 @@ import kotlinx.io.files.SystemFileSystem
 fun RawOption.path(validateParent: Boolean = true, validateExists: Boolean = false, fs: FileSystem = SystemFileSystem) =
     convert("path", CompletionCandidates.Path) {
         Path(it).also {
-            if (validateParent && it.parent != null && !fs.exists(it.parent!!)) fail("File ${it.parent} does not exist")
-            if (validateExists && !fs.exists(it)) fail("File $it does not exist")
+            if (validateParent && it.parent != null && fs.metadataOrNull(it.parent!!)?.isDirectory != true) fail("File ${it.parent} does not exist")
+            if (validateExists && fs.metadataOrNull(it)?.isRegularFile != true) fail("File $it does not exist")
         }
     }
