@@ -2,6 +2,7 @@ package eu.bsinfo.cli.command
 
 import androidx.compose.runtime.*
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.enum
@@ -28,7 +29,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlin.time.Duration.Companion.milliseconds
 
 abstract class ImportExportCommand(name: String) : CliktCommand(name) {
-    protected val client = Client()
+    protected val client by requireObject<Client>()
     protected val format by option("-f", "--format", help = "Format of the import file")
         .enum<Format>()
         .required()

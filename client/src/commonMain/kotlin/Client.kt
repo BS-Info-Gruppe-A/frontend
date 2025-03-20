@@ -39,7 +39,7 @@ class Route {
 
 val LOG = KotlinLogging.logger {}
 
-class Client {
+class Client : AutoCloseable {
     private val client = HttpClient {
         install(ContentNegotiation) {
             json()
@@ -90,4 +90,8 @@ class Client {
     }.body<Unit>()
 
     suspend fun deleteReading(id: Uuid) = client.delete(Route.Readings.Specific(id)).body<Unit>()
+
+    override fun close() {
+        client.close()
+    }
 }
