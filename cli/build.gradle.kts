@@ -24,10 +24,6 @@ kotlin {
                 implementation(libs.kotlinx.io.core)
                 implementation(libs.mosaic.runtime)
                 implementation(libs.clikt)
-
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.xmlutil)
-                implementation(libs.kotlinx.serialization.csv)
             }
         }
     }

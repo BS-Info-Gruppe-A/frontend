@@ -20,13 +20,13 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import eu.bsinfo.data.Format
 import eu.bsinfo.data.Identifiable
 import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
 import eu.bsinfo.isMobile
 import eu.bsinfo.util.FileHandle
 import eu.bsinfo.util.extension
-import eu.bsinfo.util.formats
 import eu.bsinfo.util.rememberFilePicker
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -189,7 +189,7 @@ fun <T> BigTastyBacon(
         DropdownMenuItem({ Text("Import") }, {
             scope.launch {
                 try {
-                    val filter = Filter("Datenformate", formats.keys)
+                    val filter = Filter("Datenformate", Format.extensions)
                     importPath = filePicker.chooseFile(filter)
                 } catch (_: FileDialogCancelException) {
                     expanded = false
@@ -220,7 +220,7 @@ fun <T> DataProcessor(
     if (path != null) {
         LaunchedEffect(path) {
             val extension = path.extension
-            val format = formats[extension]
+            val format = Format.fromExtension(extension)
             if (format == null) {
                 invalidFileExtension = true
             } else {

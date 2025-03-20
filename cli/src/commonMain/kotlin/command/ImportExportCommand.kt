@@ -11,7 +11,7 @@ import com.jakewharton.mosaic.ui.Text
 import eu.bsinfo.cli.components.ImporterStatus
 import eu.bsinfo.cli.components.Loading
 import eu.bsinfo.cli.components.Success
-import eu.bsinfo.cli.data.Format
+import eu.bsinfo.data.Format
 import eu.bsinfo.data.Client
 import eu.bsinfo.data.Identifiable
 import io.ktor.client.plugins.*
@@ -58,7 +58,7 @@ abstract class ExportCommand<T> : ImportExportCommand("export") {
             LaunchedEffect(Unit) {
                 withContext(Dispatchers.IO) {
                     val items = retrieveItems()
-                    val string = format.format.encodeToString(ListSerializer(serializer), items)
+                    val string = format.encodeToString(ListSerializer(serializer), items)
 
                     SystemFileSystem.sink(destination).buffered().use {
                         it.writeString(string)
@@ -105,7 +105,7 @@ abstract class ImportCommand<T : Identifiable> : ImportExportCommand("import") {
         LaunchedEffect(Unit) {
             withContext(Dispatchers.IO) {
                 val input = SystemFileSystem.source(destination).buffered().use(Source::readString)
-                val items = format.format.decodeFromString(ListSerializer(serializer), input)
+                val items = format.decodeFromString(ListSerializer(serializer), input)
                 total = items.size
                 items.map {
                     async {
