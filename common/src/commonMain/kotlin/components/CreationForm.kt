@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.bsinfo.data.ReadableEnum
@@ -36,7 +35,7 @@ fun CreationSheet(
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { model.closeCreationForm() },
-            sheetMaxWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() * .85f },
+            sheetMaxWidth = maxWidth * .85f,
             modifier = modifier
         ) {
             Text(

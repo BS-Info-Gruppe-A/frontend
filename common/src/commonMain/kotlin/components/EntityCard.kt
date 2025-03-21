@@ -15,10 +15,11 @@ fun <T : Identifiable> EntityCard(
     entity: T,
     query: String,
     onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
     tooltip: @Composable TooltipScope.() -> Unit = {},
     details: @Composable () -> Unit = {}
 ) {
-    val modifier = Modifier
+    val modifier = modifier
         .width(260.dp)
         .wrapContentHeight()
         .padding(vertical = 7.dp)

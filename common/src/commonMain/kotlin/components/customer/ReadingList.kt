@@ -51,7 +51,7 @@ fun ReadingList(customerModel: CustomersScreenModel,forCustomer: Customer) {
         } else {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 items(readings) {
-                    ReadingCard(it)
+                    ReadingCard(it, modifier = Modifier.fillMaxWidth())
                 }
 
                 item {

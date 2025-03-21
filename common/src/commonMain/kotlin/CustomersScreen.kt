@@ -134,7 +134,7 @@ fun CustomersScreen(
 @Composable
 fun CustomerCard(customer: Customer, query: String, model: CustomersScreenModel) {
     val context = LocalPlatformContext.current
-    EntityCard(customer, query, { model.focusEntity(customer) }, { RichTooltip { Text(customer.fullName) } }) {
+    EntityCard(customer, query, { model.focusEntity(customer) }, tooltip = { RichTooltip { Text(customer.fullName) } }) {
         Row(horizontalArrangement = Arrangement.SpaceAround) {
             Detail(
                 Icons.Filled.Person,

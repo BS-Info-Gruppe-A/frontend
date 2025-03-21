@@ -2,14 +2,7 @@ package eu.bsinfo.components.customer
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,19 +10,8 @@ import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +20,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import eu.bsinfo.CustomersScreenModel
+import eu.bsinfo.components.AdaptiveDivider
+import eu.bsinfo.components.AdaptiveLayout
 import eu.bsinfo.components.DeleteDialog
 import eu.bsinfo.components.Detail
 import eu.bsinfo.data.Customer
@@ -120,13 +104,13 @@ private fun CustomerDetails(model: CustomersScreenModel, customer: Customer, ope
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+        AdaptiveLayout(
+            arrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth(.5f).fillMaxHeight()
+                modifier = Modifier.fillMaxPrimary(adaptive(landscape = .5f, portrait = .3f)).fillMaxSecondary()
             ) {
                 Text(
                     "Daten",
@@ -160,7 +144,7 @@ private fun CustomerDetails(model: CustomersScreenModel, customer: Customer, ope
                     }
                 }
             }
-            VerticalDivider(Modifier.fillMaxHeight().padding(vertical = 10.dp))
+            AdaptiveDivider(Modifier.fillMaxSecondary().padding(10.dp))
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()

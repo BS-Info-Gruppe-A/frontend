@@ -276,8 +276,8 @@ fun Filter(
 }
 
 @Composable
-fun ReadingCard(reading: Reading, query: String = "", onClick: (() -> Unit)? = null) {
-    EntityCard(reading, query, onClick) {
+fun ReadingCard(reading: Reading, query: String = "", onClick: (() -> Unit)? = null, modifier: Modifier = Modifier) {
+    EntityCard(reading, query, onClick, modifier = modifier) {
         val context = LocalPlatformContext.current
 
         Column {
