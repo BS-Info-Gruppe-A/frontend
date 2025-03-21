@@ -13,6 +13,7 @@ import eu.bsinfo.common.generated.resources.csv_24px
 import eu.bsinfo.common.generated.resources.file_json_24px
 import eu.bsinfo.common.generated.resources.twemoji_poop
 import eu.bsinfo.data.Format
+import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.util.FileHandle
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -86,7 +87,12 @@ actual fun <T> Exporter(state: ExporterState, items: List<T>, serializer: KSeria
         running = { Text("Exportiere ...") },
         processor = { format, file, kSerializer ->
             val out = format.encodeToString(ListSerializer(kSerializer), items)
-            fileSaver.saveFile(out, file.name)
+            try {
+                fileSaver.saveFile(out, file.name)
+            } catch (_: FileDialogCancelException) {
+                state.handle = null
+                onClose()
+            }
         }
     )
 }
