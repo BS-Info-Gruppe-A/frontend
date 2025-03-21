@@ -143,7 +143,11 @@ class ReadingsScreenModel(val client: Client) : ViewModel(), EntityViewModel<Rea
 
     suspend fun deleteReading(readingId: Uuid) = withContext(Dispatchers.IO) {
         client.deleteReading(readingId)
-        _uiState.emit(uiState.value.copy(readings = uiState.value.readings.filter { it.id != readingId }))
+        _uiState.emit(
+            uiState.value.copy(
+                readings = uiState.value.readings.filter { it.id != readingId },
+                focusedReading = uiState.value.focusedReading?.takeIf { it.id != readingId })
+        )
     }
 
     suspend fun updateReading(client: Client, state: ReadingCreationFormState) = withContext(Dispatchers.IO) {

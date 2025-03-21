@@ -62,7 +62,11 @@ class CustomersScreenModel(private val client: Client) : ViewModel(), EntityView
 
     suspend fun deleteCustomer(customerId: Uuid) = withContext(Dispatchers.IO) {
         client.deleteCustomer(customerId)
-        _uiState.emit(uiState.value.copy(customers = uiState.value.customers.filter { it.id != customerId }))
+        _uiState.emit(
+            uiState.value.copy(
+                customers = uiState.value.customers.filter { it.id != customerId },
+                focusedCustomer = uiState.value.focusedCustomer?.takeIf { it.id != customerId })
+        )
     }
 
     override fun focusEntity(entity: Customer) {
