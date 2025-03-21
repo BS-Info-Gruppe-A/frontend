@@ -80,13 +80,19 @@ fun ReadingCreationSheet(
     val client = LocalClient.current
     val formState = rememberReadingCreationFormState(route)
 
+    LaunchedEffect(route) {
+        if (route.createForCustomer != null) {
+            model.openCreationForm()
+        }
+    }
+
     CreationSheet(model, "Ablesung erstellen", formState::validate, {
         client.createReading(formState.toReading())
 
         model.refresh()
         model.closeCreationForm()
     }) { loading ->
-        ReadingCreationInput(model, route, formState, loading)
+        ReadingCreationInput(route, formState, loading)
     }
 }
 
@@ -99,23 +105,16 @@ fun ReadingCreationForm(
     onSave: suspend CoroutineScope.() -> Unit
 ) {
     CreationForm(state::validate, onSave, saveButtonIcon, saveButtonText) { loading ->
-        ReadingCreationInput(model, null, state, loading)
+        ReadingCreationInput(null, state, loading)
     }
 }
 
 @Composable
 private fun ReadingCreationInput(
-    model: ReadingsScreenModel,
     route: MainScreen.Readings?,
     formState: ReadingCreationFormState,
     loading: Boolean
 ) {
-    LaunchedEffect(route) {
-        if (route?.createForCustomer != null) {
-            model.openCreationForm()
-        }
-    }
-
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterHorizontally),
         modifier = Modifier.fillMaxWidth()
