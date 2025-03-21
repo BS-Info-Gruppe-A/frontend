@@ -24,7 +24,8 @@ kotlin {
         }
 
         compilerOptions {
-            freeCompilerArgs.add("-Xwasm-use-new-exception-proposal")
+            // Not supported by Chrome yet
+            //freeCompilerArgs.add("-Xwasm-use-new-exception-proposal")
         }
     }
 
