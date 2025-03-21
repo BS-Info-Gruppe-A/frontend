@@ -1,11 +1,15 @@
 package eu.bsinfo.build
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-
 
 fun KotlinMultiplatformExtension.uiTargets() {
     jvm()
-    androidTarget()
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
 
     wasmJs {
         browser()

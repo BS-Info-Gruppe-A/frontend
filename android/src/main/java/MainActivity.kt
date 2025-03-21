@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        client = Client()
         setContent {
             CompositionLocalProvider(LocalClient provides client) {
                 BSInfoApp()

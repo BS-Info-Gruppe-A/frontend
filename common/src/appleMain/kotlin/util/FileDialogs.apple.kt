@@ -6,7 +6,7 @@ import androidx.compose.ui.uikit.LocalUIViewController
 import eu.bsinfo.IO
 import eu.bsinfo.file_dialog.FileDialogCancelException
 import eu.bsinfo.file_dialog.Filter
-import io.ktor.utils.io.core.writeText
+import io.ktor.utils.io.core.*
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -16,16 +16,10 @@ import kotlinx.io.bytestring.decodeToString
 import kotlinx.io.bytestring.toByteString
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import platform.Foundation.NSArray
 import platform.Foundation.NSData
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSMutableArray
-import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
 import platform.Foundation.create
-import platform.Foundation.stringWithUTF8String
-import platform.Foundation.temporaryDirectory
 import platform.UIKit.UIDocumentPickerDelegateProtocol
 import platform.UIKit.UIDocumentPickerViewController
 import platform.UIKit.UIViewController
@@ -57,8 +51,7 @@ actual class FileHandle(private val url: NSURL) {
 private class PickerCallback(
     val exportJob: ExportJob?,
     val result: CompletableDeferred<FileHandle> = CompletableDeferred()
-) :
-    NSObject(), UIDocumentPickerDelegateProtocol {
+) : NSObject(), UIDocumentPickerDelegateProtocol {
     private fun cleanup() {
         if (exportJob != null) {
             val tempDir = NSURL.fileURLWithPath(NSTemporaryDirectory())
