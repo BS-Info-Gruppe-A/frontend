@@ -1,6 +1,8 @@
 package eu.bsinfo
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -133,13 +135,16 @@ fun CustomersScreen(
 fun CustomerCard(customer: Customer, query: String, model: CustomersScreenModel) {
     val context = LocalPlatformContext.current
     EntityCard(customer, query, { model.focusEntity(customer) }, { RichTooltip { Text(customer.fullName) } }) {
-        Detail(
-            Icons.Filled.Person,
-            customer.gender.humanName
-        )
-        Detail(
-            icon = Icons.Filled.Cake,
-            text = formatLocalDate(context, customer.birthDate)
-        )
+        Row(horizontalArrangement = Arrangement.SpaceAround) {
+            Detail(
+                Icons.Filled.Person,
+                customer.gender.humanName
+            )
+            Spacer(Modifier.weight(1f))
+            Detail(
+                icon = Icons.Filled.Cake,
+                text = formatLocalDate(context, customer.birthDate)
+            )
+        }
     }
 }

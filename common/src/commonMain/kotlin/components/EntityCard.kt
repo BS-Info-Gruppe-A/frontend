@@ -20,7 +20,7 @@ fun <T : Identifiable> EntityCard(
 ) {
     val modifier = Modifier
         .width(260.dp)
-        .height(100.dp)
+        .wrapContentHeight()
         .padding(vertical = 7.dp)
 
     @Composable
@@ -30,7 +30,7 @@ fun <T : Identifiable> EntityCard(
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
-            Column(Modifier.padding(top = 3.dp, bottom = 10.dp)) {
+            Column(Modifier.padding(10.dp)) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
@@ -45,9 +45,6 @@ fun <T : Identifiable> EntityCard(
                             style = MaterialTheme.typography.headlineSmall,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 7.dp)
-                                .fillMaxWidth(fraction = .9f)
                         )
                     }
                     Spacer(Modifier.weight(1f))
@@ -73,7 +70,7 @@ fun <T : Identifiable> EntityCard(
 
 @Composable
 fun Detail(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
-    Row(modifier.padding(horizontal = 3.dp)) {
+    Row(modifier) {
         Icon(imageVector = icon, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 3.dp))
         Text(text)

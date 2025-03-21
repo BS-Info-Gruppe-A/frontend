@@ -280,26 +280,30 @@ fun ReadingCard(reading: Reading, query: String = "", onClick: (() -> Unit)? = n
     EntityCard(reading, query, onClick) {
         val context = LocalPlatformContext.current
 
-        Row {
-            Detail(
-                Icons.Filled.Person,
-                reading.customer?.fullName ?: "Unbekannt",
-                modifier = Modifier.fillMaxWidth(.6f)
-            )
-            Detail(
-                icon = Icons.Filled.GasMeter,
-                text = reading.meterCount.format(context)
-            )
-        }
-        Row {
-            Detail(
-                icon = Icons.Filled.CalendarToday,
-                text = formatLocalDate(context, reading.date)
-            )
-            Detail(
-                icon = Icons.Filled.ElectricMeter,
-                text = reading.kind.humanName
-            )
+        Column {
+            Row {
+                Detail(
+                    Icons.Filled.Person,
+                    reading.customer?.fullName ?: "Unbekannt",
+                    modifier = Modifier.fillMaxWidth(.6f)
+                )
+                Detail(
+                    icon = Icons.Filled.GasMeter,
+                    text = reading.meterCount.format(context)
+                )
+            }
+
+            Row {
+                Detail(
+                    icon = Icons.Filled.CalendarToday,
+                    text = formatLocalDate(context, reading.date),
+                    modifier = Modifier.fillMaxWidth(.6f)
+                )
+                Detail(
+                    icon = Icons.Filled.ElectricMeter,
+                    text = reading.kind.humanName
+                )
+            }
         }
     }
 }
