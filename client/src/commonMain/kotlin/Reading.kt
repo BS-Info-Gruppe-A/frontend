@@ -2,6 +2,7 @@ package eu.bsinfo.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -20,6 +21,8 @@ data class Reading(
     val meterId: String,
     val substitute: Boolean
 ) : Identifiable {
+
+    @Transient
     override val displayName: String = "Ablesung von $meterId"
 
     fun toUpdatableReading() = UpdatableReading(
