@@ -37,7 +37,7 @@ abstract class ImportExportCommand(name: String) : CliktCommand(name) {
     @Composable
     abstract fun execute()
 
-    final override fun run() = runBlocking {
+    final override fun run(): Unit = runBlocking {
         runMosaic { execute() }
     }
 }

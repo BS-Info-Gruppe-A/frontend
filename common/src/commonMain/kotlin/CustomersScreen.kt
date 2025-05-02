@@ -113,6 +113,7 @@ fun CustomersScreen(
         client::createCustomer,
         addButtonIcon = { Icon(Icons.Default.Add, "Create") },
         addButtonText = { Text("Kunden erstellen") },
+        serializer = Customer.serializer(),
         searchPlaceholder = { Text("Suche nach Kundenname") }
     ) {
         CustomerCreationSheet(model)

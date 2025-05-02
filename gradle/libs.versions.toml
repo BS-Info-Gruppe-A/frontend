@@ -1,23 +1,23 @@
 [versions]
-kotlin = "2.1.10"
-coroutines = "1.10.1"
-compose = "1.8.0-alpha04"
-ktor = "3.1.1"
-jansi = "2.4.1"
-logback = "1.5.17"
-proguard = "7.6.1"
-android = "8.9.0"
+kotlin = "2.1.20"
+coroutines = "1.10.2"
+compose = "1.8.0-rc01"
+ktor = "3.1.2"
+jansi = "2.4.2"
+logback = "1.5.18"
+proguard = "7.7.0"
+android = "8.11.0-alpha09"
 
 [libraries]
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.2" }
 kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version = "0.7.0" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.8.0" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.8.1" }
 kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version = "0.3" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "coroutines" }
 
-kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version = "7.0.5" }
+kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version = "7.0.7" }
 kotlin-string-similarity = { group = "string-similarity-kotlin", name = "string-similarity", version = "unspecified" }
 
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
@@ -31,10 +31,10 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-client-resources = { group = "io.ktor", name = "ktor-client-resources", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
-androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version = "2.9.0-alpha04" }
-androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version = "2.9.0-alpha14" }
+androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version = "2.9.0-alpha07" }
+androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version = "2.9.0-alpha17" }
 
-xmlutil = { group = "io.github.pdvrieze.xmlutil", name = "serialization", version = "0.90.3" }
+xmlutil = { group = "io.github.pdvrieze.xmlutil", name = "serialization", version = "0.91.0" }
 kotlinx-serialization-csv = { group = "app.softwork", name = "kotlinx-serialization-csv", version = "0.0.20" }
 
 jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
@@ -42,14 +42,14 @@ logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "l
 
 android-build-tools-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "android" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.0" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-material = { group = "com.google.android.material", name = "material", version = "1.12.0" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.11.0-rc01" }
+material = { group = "com.google.android.material", name = "material", version = "1.13.0-alpha13" }
 
-mosaic-runtime = { group = "com.jakewharton.mosaic", name = "mosaic-runtime", version = "0.16.0" }
-clikt = { group = "com.github.ajalt.clikt", name = "clikt", version = "5.0.1" }
+mosaic-runtime = { group = "com.jakewharton.mosaic", name = "mosaic-runtime", version = "0.17.0" }
+clikt = { group = "com.github.ajalt.clikt", name = "clikt", version = "5.0.3" }
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
-skie = { id = "co.touchlab.skie", version = "0.10.1" }
+skie = { id = "co.touchlab.skie", version = "0.10.2-preview.2.1.20" }

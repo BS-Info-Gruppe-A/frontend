@@ -57,15 +57,15 @@ interface EntityViewModel<T : Identifiable> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-inline fun <reified T> EntityContainer(
+fun < T> EntityContainer(
     viewModel: EntityViewModel<*>,
     items: List<T>,
-    noinline importItem: suspend (T) -> Unit,
-    serializer: KSerializer<T> = serializer(),
-    noinline addButtonIcon: @Composable () -> Unit = {},
-    noinline addButtonText: @Composable () -> Unit = {},
-    noinline searchPlaceholder: @Composable () -> Unit = {},
-    noinline content: @Composable () -> Unit = {}
+    importItem: suspend (T) -> Unit,
+    serializer: KSerializer<T>,
+    addButtonIcon: @Composable () -> Unit = {},
+    addButtonText: @Composable () -> Unit = {},
+    searchPlaceholder: @Composable () -> Unit = {},
+    content: @Composable () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
 

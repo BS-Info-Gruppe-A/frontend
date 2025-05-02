@@ -6,5 +6,5 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 val kotlinJvmTarget = JvmTarget.JVM_21
 val javaVersion = JavaVersion.toVersion(kotlinJvmTarget.target)
 
-val androidCompileSdk = 35
+val androidCompileSdk = 36
 val androidMinSdk = 23

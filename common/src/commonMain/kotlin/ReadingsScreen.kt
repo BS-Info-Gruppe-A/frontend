@@ -191,6 +191,7 @@ fun ReadingsScreen(
         client::createReading,
         addButtonIcon = { Icon(Icons.Default.Add, "Create") },
         addButtonText = { Text("Ablesung erstellen") },
+        serializer = Reading.serializer(),
         searchPlaceholder = { Text("Suche nach meter id") }
     ) {
         Filters(model, modifier = Modifier.padding(vertical = 5.dp))
