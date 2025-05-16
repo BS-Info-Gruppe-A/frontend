@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.enum
+import com.jakewharton.mosaic.NonInteractivePolicy
 import com.jakewharton.mosaic.runMosaic
 import com.jakewharton.mosaic.ui.Color
 import com.jakewharton.mosaic.ui.Text
@@ -38,7 +39,7 @@ abstract class ImportExportCommand(name: String) : CliktCommand(name) {
     abstract fun execute()
 
     final override fun run(): Unit = runBlocking {
-        runMosaic { execute() }
+        runMosaic(NonInteractivePolicy.Ignore) { execute() }
     }
 }
 

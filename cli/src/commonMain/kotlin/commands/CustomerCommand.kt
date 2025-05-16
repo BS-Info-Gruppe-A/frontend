@@ -14,7 +14,7 @@ val CustomerCommand: CliktCommand = Command.subcommands(
 )
 
 private object Command : CliktCommand("customers") {
-    override fun help(context: Context): String = "M2anages customers"
+    override fun help(context: Context): String = "Manages customers"
     override fun run() = Unit
 }
 

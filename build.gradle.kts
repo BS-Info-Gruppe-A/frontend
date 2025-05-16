@@ -9,5 +9,6 @@ allprojects {
         mavenCentral()
         google()
         maven("https://europe-west3-maven.pkg.dev/mik-music/mikbot")
+        maven("https://central.sonatype.com/repository/maven-snapshots/")
     }
 }

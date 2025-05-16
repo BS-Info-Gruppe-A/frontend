@@ -45,7 +45,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.11.0-rc01" }
 material = { group = "com.google.android.material", name = "material", version = "1.13.0-alpha13" }
 
-mosaic-runtime = { group = "com.jakewharton.mosaic", name = "mosaic-runtime", version = "0.17.0" }
+mosaic-runtime = { group = "com.jakewharton.mosaic", name = "mosaic-runtime", version = "0.18.0-SNAPSHOT" }
 clikt = { group = "com.github.ajalt.clikt", name = "clikt", version = "5.0.3" }
 
 [plugins]
